@@ -1,0 +1,104 @@
+{
+  "run": {
+    "engine": "GEMMA_LOCAL",
+    "model": "gemma3",
+    "timestamp": "2026-09-03T18:16:00.598Z",
+    "execution_ms": 92127,
+    "corpus_files": [
+      "FLLD-CLIN-v2.md",
+      "FLLD-DM-v3.md",
+      "field-mapping.csv",
+      "teams-export.txt"
+    ],
+    "note": "Severity and likelihood are proposals. Nothing here is a confirmed hazard log entry until a Clinical Safety Officer signs it (DCB0160 3.3.2).",
+    "standard": {
+      "id": "DCB0160",
+      "amendment": "Amd 25/2018",
+      "version": "3.2",
+      "published": "7 June 2018",
+      "legal_basis": "Section 250, Health and Social Care Act 2012"
+    }
+  },
+  "entries": [
+    {
+      "finding_id": "F-01",
+      "hazard_name": "Inaccurate Allergy Severity Assessment",
+      "hazard_description": "The automated derivation of allergy severity from free-text clinical notes introduces the risk of misclassifying patient allergies, potentially leading to inappropriate treatment decisions.",
+      "causes": [
+        "Default severity derivation from free text in DM-04-R04.",
+        "Lack of clinical validation of automated severity assessments."
+      ],
+      "clinical_effect": "Incorrect allergy severity classification leading to inappropriate treatment decisions.",
+      "existing_controls": [
+        "None recorded"
+      ],
+      "proposed_severity": "Significant",
+      "proposed_likelihood": "Medium",
+      "proposed_controls": [
+        "Strict prohibition of automated severity derivation from free text.",
+        "Mandatory clinical review and validation of all allergy severity classifications before migration."
+      ],
+      "proposed_owner_role": "Clinical Safety Officer",
+      "evidence": [
+        {
+          "file": "FLLD-CLIN-v2.md",
+          "line": 28,
+          "excerpt": "Allergy severity and adverse reaction manifestations shall be captured directly from the patient at first appointment, never inferred or derived from automated algorithms or unverified historical free-text notes.",
+          "verified": true
+        },
+        {
+          "file": "teams-export.txt",
+          "line": 2,
+          "excerpt": "Marcus Brody (Pharmacy SME): Hi David. I reviewed the severity transformation logic in DM-04-R04. We can't derive severity from free text, it's a prescribing risk.",
+          "verified": true
+        }
+      ],
+      "hazard_id": "HZ-001",
+      "standard_refs": [
+        "DCB0160 4.3.1 identify hazards in normal and fault conditions",
+        "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
+        "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
+      ]
+    },
+    {
+      "finding_id": "F-02",
+      "hazard_name": "Default Severity Migration",
+      "hazard_description": "The default migration of 'Unknown' severity to CareTrak records during parsing failures introduces the risk of inaccurate risk assessments due to missing severity information.",
+      "causes": [
+        "Default severity to 'Unknown' in DM-04-R05 on parse failure.",
+        "Lack of clinical validation of migrated 'Unknown' severity values."
+      ],
+      "clinical_effect": "Patient records with missing severity information leading to inaccurate risk assessments and inappropriate treatment decisions.",
+      "existing_controls": [
+        "None recorded"
+      ],
+      "proposed_severity": "Significant",
+      "proposed_likelihood": "Medium",
+      "proposed_controls": [
+        "Clinical review of all records with 'Unknown' severity before migration.",
+        "Implementation of a process for escalating 'Unknown' severity records for clinical review."
+      ],
+      "proposed_owner_role": "Pharmacy SME",
+      "evidence": [
+        {
+          "file": "FLLD-DM-v3.md",
+          "line": 32,
+          "excerpt": "Where no severity keyword can be parsed from the legacy note, the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible in the clinical summary panel pending review at the patient's next encounter.",
+          "verified": true
+        },
+        {
+          "file": "teams-export.txt",
+          "line": 13,
+          "excerpt": "Dr Eleanor Vance: Separate point for the paediatric batch. The safeguarding flag on the CareTrak record for the Okafor child (NHS 621 903 4471) is held in CLINICAL_COMMENTS, not a coded field. If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?",
+          "verified": true
+        }
+      ],
+      "hazard_id": "HZ-002",
+      "standard_refs": [
+        "DCB0160 4.3.1 identify hazards in normal and fault conditions",
+        "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
+        "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
+      ]
+    }
+  ]
+}

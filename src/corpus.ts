@@ -58,6 +58,7 @@ export function getLine(corpus: Corpus, file: string, line: number): string | un
 
 export type Citation = { file: string; line: number; excerpt: string };
 export type Verification = { verified: boolean; reason: string; actual?: string };
+export type Resolved = Verification & { file: string; line: number; repaired: boolean; cited_as?: { file: string; line: number } };
 
 function norm(s: string): string {
   return s
@@ -89,4 +90,30 @@ export function verifyCitation(corpus: Corpus, c: Citation): Verification {
   if (e.length < MIN_EXCERPT) return { verified: false, reason: `excerpt shorter than ${MIN_EXCERPT} chars`, actual };
   if (!a.includes(e)) return { verified: false, reason: 'excerpt is not on the cited line', actual };
   return { verified: true, reason: 'excerpt found on cited line', actual };
+}
+
+/**
+ * The excerpt is the proof; the address is derived from it.
+ *
+ * Small local models copy a line verbatim and then mislabel where it came
+ * from (a real clinical-design line attributed to the migration file, a real
+ * chat line given a line number past the end of the export). If the cited
+ * FILE:LINE verifies, it stands. If it does not, and the excerpt is found on
+ * exactly one line of the corpus, the citation is corrected to that line and
+ * marked `repaired`, with the original address kept. Found on no line, or on
+ * more than one, it is rejected. Nothing is ever repaired from a blank or
+ * too-short excerpt.
+ */
+export function resolveCitation(corpus: Corpus, c: Citation): Resolved {
+  const direct = verifyCitation(corpus, c);
+  if (direct.verified) return { ...direct, file: c.file, line: c.line, repaired: false };
+  const e = norm(c.excerpt ?? '');
+  if (!e || e.length < MIN_EXCERPT) return { ...direct, file: c.file, line: c.line, repaired: false };
+  const hits = corpusLines(corpus).filter((l) => norm(l.text).includes(e));
+  if (hits.length === 1) {
+    const h = hits[0];
+    return { verified: true, reason: `excerpt found on exactly one corpus line; citation corrected from ${c.file}:${c.line}`, actual: h.text, file: h.file, line: h.line, repaired: true, cited_as: { file: c.file, line: c.line } };
+  }
+  if (hits.length === 0) return { verified: false, reason: 'excerpt is not on the cited line and not anywhere in the corpus', actual: direct.actual, file: c.file, line: c.line, repaired: false };
+  return { verified: false, reason: `excerpt is not on the cited line and is ambiguous: found on ${hits.length} lines`, actual: direct.actual, file: c.file, line: c.line, repaired: false };
 }

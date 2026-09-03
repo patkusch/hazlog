@@ -114,7 +114,7 @@
     const n = cite.line, text = lines[n - 1] ?? '';
     const i = text.toLowerCase().indexOf(String(cite.excerpt).toLowerCase());
     const marked = i >= 0 ? esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + cite.excerpt.length)) + '</mark>' + esc(text.slice(i + cite.excerpt.length)) : esc(text);
-    el.innerHTML = `<div class="ph"><span class="file">${esc(cite.file)}</span><span class="mono">line ${n}</span><span class="v">${cite.verified === false ? '✗ not verified' : '✓ verified in code'}</span></div><div class="body">` +
+    el.innerHTML = `<div class="ph"><span class="file">${esc(cite.file)}</span><span class="mono">line ${n}</span><span class="v">${cite.verified === false ? '✗ not verified' : '✓ verified in code'}</span>${cite.repaired ? `<span class="small" title="The model cited ${esc(cite.cited_as.file)}:${cite.cited_as.line}; the verbatim excerpt was found on exactly one corpus line and the citation was corrected to it.">· corrected from ${esc(cite.cited_as.file)}:${cite.cited_as.line}</span>` : ''}</div><div class="body">` +
       lines.map((t, k) => `<div class="ln ${k + 1 === n ? 'hit' : ''}" id="${el.id}-l${k + 1}"><span class="n">${k + 1}</span><span>${k + 1 === n ? marked : esc(t) || ' '}</span></div>`).join('') + '</div>';
     const hit = el.querySelector('.hit'); if (hit) hit.scrollIntoView({ block: 'center' });
   }
@@ -137,7 +137,7 @@
       <div class="titlebar"><h2>${esc(e.hazard_id)} · ${esc(e.hazard_name)}</h2>${statusChip(e)}<span class="chip">finding ${esc(e.finding_id)} · ${esc(f.type || '')}</span></div>
       <div class="panes"><div class="pane" id="paneA"></div><div class="pane" id="paneB"></div></div>
       <div class="evidence">Evidence (${e.evidence.length}, every one checked against the source line):
-        ${e.evidence.map((c, i) => `<button class="cite" data-i="${i}" title="${esc(c.excerpt)}">${esc(c.file)}:${c.line} ${c.verified === false ? '✗' : '✓'}</button>`).join('')}
+        ${e.evidence.map((c, i) => `<button class="cite" data-i="${i}" title="${esc(c.excerpt)}${c.repaired ? ' (cited as ' + esc(c.cited_as.file) + ':' + c.cited_as.line + ', corrected)' : ''}">${esc(c.file)}:${c.line} ${c.verified === false ? '✗' : c.repaired ? '✓ corrected' : '✓'}</button>`).join('')}
       </div>
       <div class="entry">
         <h3>Hazard log entry · ${esc(log.run.standard.id)} ${esc(log.run.standard.amendment)} · proposed</h3>

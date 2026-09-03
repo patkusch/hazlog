@@ -6,15 +6,15 @@
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { loadCorpus, prefixedCorpus, verifyCitation, type Corpus, type Citation } from './corpus.ts';
+import { loadCorpus, prefixedCorpus, resolveCitation, getLine, type Corpus, type Citation } from './corpus.ts';
 import { buildIndex, type Index } from './prepass.ts';
 import { generateJson, type OllamaOptions } from './ollama.ts';
 import { riskRating } from './risk.ts';
 
 const SCHEMAS = JSON.parse(readFileSync(fileURLToPath(new URL('../shared/schema.json', import.meta.url)), 'utf8'));
 
-export type Source = Citation & { verified?: boolean };
-export type Requirement = { id: string; statement: string; file: string; line: number; excerpt: string; author: string; date: string; status: string; workstream: string };
+export type Source = Citation & { verified?: boolean; repaired?: boolean; cited_as?: { file: string; line: number } };
+export type Requirement = { id: string; statement: string; file: string; line: number; excerpt: string; author: string; date: string; status: string; workstream: string; repaired?: boolean; cited_as?: { file: string; line: number }; id_cited_as?: string; source?: 'model' | 'pass0' };
 export type Finding = { id: string; type: string; title: string; why_incompatible: string; clinical_consequence: string; sources: Source[] };
 export type HazardEntry = {
   hazard_id: string; finding_id: string; hazard_name: string; hazard_description: string; causes: string[];
@@ -31,15 +31,16 @@ Be specific, be short, and never invent requirements, people or documents that a
 export function pass1Prompt(corpus: Corpus, index: Index): string {
   const ids = index.requirement_ids.filter((r) => r.heading).map((r) => `${r.id} (${r.file}:${r.line})`).join(', ');
   return `PASS 1 - EXTRACTION.
-Extract every atomic requirement, decision or constraint from the corpus. Treat formal requirement statements, spreadsheet rows and chat messages as equally first-class.
+Extract every atomic requirement from the DESIGN DOCUMENTS (.md files) in the corpus. The mapping sheet (.csv) and the chat export (.txt) are indexed deterministically and handed to the next pass line by line; do not extract from them here.
+Copy the excerpt verbatim from a single line. The FILE and LINE you give are checked in code and, if wrong, corrected from the excerpt; an excerpt that is not in the corpus is discarded.
 Known requirement headings from the deterministic index: ${ids}. The requirement text is normally on the line after its heading; cite the text line.
-For each item give: id (use the document's own id, or MAP-ROW-nn for a CSV row, or CHAT-nn for a chat message), a one-sentence statement, file, line, a verbatim excerpt from that line, author, date, status (APPROVED for signed designs, DRAFT for the mapping sheet, VERBAL for a chat statement, UNRECORDED for a decision that reached no document) and workstream.
+For each item give: id (the document's own id, e.g. DM-04-R05), a one-sentence statement, file, line, a verbatim excerpt from that line, author, date, status (APPROVED for signed designs) and workstream.
 
 CORPUS:
 ${prefixedCorpus(corpus)}`;
 }
 
-export function pass2Prompt(corpus: Corpus, requirements: Requirement[]): string {
+export function pass2Prompt(corpus: Corpus, requirements: Requirement[], seeded: Requirement[] = []): string {
   return `PASS 2 - HAZARD DETECTION.
 Using the verified requirements below and the full corpus, find every place where two or more artefacts cannot both be true, or where a decision has no authoritative source or no owner. Types:
 - CONTRADICTION: two approved requirements that cannot both be satisfied
@@ -47,10 +48,13 @@ Using the verified requirements below and the full corpus, find every place wher
 - VERBAL_OVERRIDE: a decision made in chat or a sheet that an approved document still contradicts
 - ORPHAN_DEPENDENCY: a build artefact that depends on a design that does not exist
 - UNOWNED_DECISION: a question raised and not owned by anyone
-Every finding MUST cite at least two sources from at least two different files, each with file, line and a verbatim excerpt. Describe the clinical consequence for a patient, not the project consequence.
+Every finding MUST cite at least two sources from at least two DIFFERENT FILES, each with file, line and an excerpt copied verbatim from that one line. Two requirements in the same document that agree with each other are not a finding. Copy the excerpt exactly; the file and line are checked in code and corrected from the excerpt if wrong. Describe the clinical consequence for a patient, not the project consequence.
 
-VERIFIED REQUIREMENTS:
-${JSON.stringify(requirements, null, 1)}
+VERIFIED DESIGN REQUIREMENTS (extracted from the design documents, provenance checked):
+${JSON.stringify(requirements.map(({ id, statement, file, line, excerpt, author, date, status }) => ({ id, statement, file, line, excerpt, author, date, status })), null, 1)}
+
+MAPPING SHEET ROWS AND CHAT MESSAGES (indexed deterministically; file and line are exact):
+${JSON.stringify(seeded.map(({ id, statement, file, line, author, date, status }) => ({ id, statement, file, line, author, date, status })), null, 1)}
 
 CORPUS:
 ${prefixedCorpus(corpus)}`;
@@ -58,7 +62,7 @@ ${prefixedCorpus(corpus)}`;
 
 export function pass3Prompt(corpus: Corpus, findings: Finding[]): string {
   return `PASS 3 - HAZARD LOG ENTRY.
-For each finding, draft a DCB0160 hazard log entry. Give hazard_name, hazard_description, causes, clinical_effect, existing_controls (from the corpus; say "None recorded" if none), proposed_severity (Minor, Significant, Considerable, Major, Catastrophic), a one-sentence severity_rationale, proposed_likelihood (Very low, Low, Medium, High, Very high), a one-sentence likelihood_rationale, proposed_controls, proposed_owner_role (a role named in the corpus, or UNASSIGNED with a proposal), and evidence: at least two citations with file, line and verbatim excerpt.
+For each finding, draft a DCB0160 hazard log entry. Give hazard_name, hazard_description, causes, clinical_effect, existing_controls (from the corpus; say "None recorded" if none), proposed_severity (Minor, Significant, Considerable, Major, Catastrophic), a one-sentence severity_rationale, proposed_likelihood (Very low, Low, Medium, High, Very high), a one-sentence likelihood_rationale, proposed_controls, proposed_owner_role (a role named in the corpus, or UNASSIGNED with a proposal), and evidence: at least two citations from two different files, each with file, line and an excerpt copied verbatim from that one line (reuse the finding's sources where they fit).
 You are proposing. A Clinical Safety Officer confirms severity and likelihood; you do not.
 
 FINDINGS:
@@ -71,12 +75,12 @@ ${prefixedCorpus(corpus)}`;
 function verifyAll(corpus: Corpus, cites: Citation[]): { ok: boolean; sources: Source[]; reason?: string } {
   const sources: Source[] = [];
   for (const c of cites) {
-    const v = verifyCitation(corpus, c);
-    sources.push({ ...c, verified: v.verified });
+    const v = resolveCitation(corpus, c);
+    sources.push({ ...c, file: v.file, line: v.line, verified: v.verified, ...(v.repaired ? { repaired: true, cited_as: v.cited_as } : {}) });
     if (!v.verified) return { ok: false, sources, reason: `${c.file}:${c.line}: ${v.reason}` };
   }
-  const files = new Set(cites.map((c) => c.file));
-  if (cites.length < 2) return { ok: false, sources, reason: 'fewer than two sources' };
+  const files = new Set(sources.map((c) => c.file));
+  if (sources.length < 2) return { ok: false, sources, reason: 'fewer than two sources' };
   if (files.size < 2) return { ok: false, sources, reason: 'all sources are in one file; a hazard between documents needs two documents' };
   return { ok: true, sources };
 }
@@ -92,21 +96,41 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
   const p1 = await generateJson<{ requirements: Requirement[] }>(SYSTEM, pass1Prompt(corpus, index), SCHEMAS.pass1_requirements, opts);
   const requirements: Requirement[] = [];
   for (const r of p1.requirements ?? []) {
-    const v = verifyCitation(corpus, { file: r.file, line: r.line, excerpt: r.excerpt });
-    if (v.verified) requirements.push(r);
-    else dropped.push({ pass: 1, id: r.id, reason: `${r.file}:${r.line}: ${v.reason}`, item: r });
+    const v = resolveCitation(corpus, { file: r.file, line: r.line, excerpt: r.excerpt });
+    if (!v.verified) { dropped.push({ pass: 1, id: r.id, reason: `${r.file}:${r.line}: ${v.reason}`, item: r }); continue; }
+    const out: Requirement = { ...r, file: v.file, line: v.line, source: 'model', ...(v.repaired ? { repaired: true, cited_as: v.cited_as } : {}) };
+    // The line above a requirement's text is its heading in the design documents; the index knows the heading's id.
+    const heading = index.requirement_ids.find((h) => h.heading && h.file === v.file && h.line === v.line - 1);
+    if (heading && heading.id !== r.id) { out.id_cited_as = r.id; out.id = heading.id; }
+    if (requirements.some((x) => x.file === out.file && x.line === out.line)) continue;
+    requirements.push(out);
   }
-  log(`  ${requirements.length} requirements verified, ${p1.requirements.length - requirements.length} dropped`);
+  const repaired1 = requirements.filter((r) => r.repaired).length;
+  log(`  ${requirements.length} requirements verified (${repaired1} with the citation corrected from the excerpt), ${(p1.requirements ?? []).length - requirements.length} dropped`);
+
+  // Sheet rows and chat messages come from Pass 0 with exact addresses; no model in the loop.
+  const seeded: Requirement[] = [];
+  for (const row of index.csv_rows) {
+    const text = getLine(corpus, row.file, row.line) ?? '';
+    seeded.push({ id: `MAP-ROW-${String(row.Row).padStart(2, '0')}`, statement: `${row.Legacy_Field} -> ${row.Aurora_Field} | Migrate=${row.Migrate} | ${row.Transform}`, file: row.file, line: row.line, excerpt: text, author: row.Owner ?? '', date: row.Last_Changed ?? '', status: 'DRAFT', workstream: 'Data Migration (mapping sheet)', source: 'pass0' });
+  }
+  index.chat_messages.forEach((m, i) => {
+    const text = getLine(corpus, m.file, m.line) ?? '';
+    const body = text.replace(/^\[[^\]]+\]\s+[^:]+:\s*/, '');
+    seeded.push({ id: `CHAT-${String(i + 1).padStart(2, '0')}`, statement: body, file: m.file, line: m.line, excerpt: text, author: m.speaker, date: m.timestamp, status: 'VERBAL', workstream: 'Decision channel', source: 'pass0' });
+  });
+  log(`  ${seeded.length} sheet rows and chat messages indexed deterministically`);
 
   log('pass 2: hazard detection');
-  const p2 = await generateJson<{ findings: Finding[] }>(SYSTEM, pass2Prompt(corpus, requirements), SCHEMAS.pass2_findings, opts);
+  const p2 = await generateJson<{ findings: Finding[] }>(SYSTEM, pass2Prompt(corpus, requirements, seeded), SCHEMAS.pass2_findings, opts);
   const findings: Finding[] = [];
   (p2.findings ?? []).forEach((f, i) => {
     const v = verifyAll(corpus, f.sources ?? []);
     if (v.ok) findings.push({ ...f, id: `F-${String(findings.length + 1).padStart(2, '0')}`, sources: v.sources });
     else dropped.push({ pass: 2, id: f.id ?? `candidate-${i + 1}`, reason: v.reason!, item: { ...f, sources: v.sources } });
   });
-  log(`  ${findings.length} findings verified, ${(p2.findings ?? []).length - findings.length} dropped`);
+  const repaired2 = findings.reduce((n, f) => n + f.sources.filter((x) => x.repaired).length, 0);
+  log(`  ${findings.length} findings verified (${repaired2} citations corrected from their excerpt), ${(p2.findings ?? []).length - findings.length} dropped`);
 
   log('pass 3: hazard log entries');
   const entries: HazardEntry[] = [];
@@ -129,7 +153,7 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
 
   const run = { engine: 'GEMMA_LOCAL', model: opts.model ?? process.env.HAZLOG_MODEL ?? 'gemma3', timestamp: new Date().toISOString(), execution_ms: Date.now() - t0, corpus_files: corpus.files.map((f) => f.file) };
   return {
-    findings: { run, requirements, findings, dropped },
+    findings: { run, requirements: [...requirements, ...seeded], findings, dropped },
     hazardLog: {
       run: { ...run, note: 'Severity and likelihood are proposals. Nothing here is a confirmed hazard log entry until a Clinical Safety Officer signs it (DCB0160 3.3.2).', standard: { id: 'DCB0160', amendment: 'Amd 25/2018', version: '3.2', published: '7 June 2018', legal_basis: 'Section 250, Health and Social Care Act 2012' } },
       entries,

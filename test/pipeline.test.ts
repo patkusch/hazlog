@@ -26,6 +26,9 @@ const PASS2 = { findings: [
   { id: 'c3', type: 'CONTRADICTION', title: 'single file', why_incompatible: 'x', clinical_consequence: 'y', sources: [
     { file: 'FLLD-DM-v3.md', line: 26, excerpt: 'immediately visible and active' },
     { file: 'FLLD-DM-v3.md', line: 32, excerpt: 'severity defaulted to "Unknown"' } ] },
+  { id: 'c4', type: 'VERBAL_OVERRIDE', title: 'snapped', why_incompatible: 'x', clinical_consequence: 'y', sources: [
+    { file: 'FLLD-DM-v3.md', line: 28, excerpt: 'never inferred or derived from automated algorithms' },
+    { file: 'teams-export.txt', line: 37, excerpt: 'there is no approved design document for ward-level location translation' } ] },
 ] };
 const PASS3 = { entries: [
   { finding_id: 'F-01', hazard_name: 'h', hazard_description: 'd', causes: ['c'], clinical_effect: 'e', existing_controls: [], proposed_severity: 'Major', proposed_likelihood: 'High', proposed_controls: ['p'], proposed_owner_role: 'CSO', evidence: [
@@ -58,13 +61,19 @@ describe('runPipeline against a fake local model', () => {
   test('keeps only what verifies and records why the rest was dropped', async () => {
     const r = await runPipeline('corpus', { host, model: 'fake' });
     assert.equal(call, 3, 'three passes, three calls');
-    assert.deepEqual(r.findings.requirements.map((x) => x.id), ['DM-04-R05', 'CLIN-11-R01']);
-    assert.deepEqual(r.findings.findings.map((f) => f.title), ['real']);
+    const modelReqs = r.findings.requirements.filter((x) => x.source === 'model');
+    assert.deepEqual(modelReqs.map((x) => x.id), ['DM-04-R05', 'CLIN-11-R01']);
+    assert.equal(r.findings.requirements.filter((x) => x.source === 'pass0').length, 12 + 15, 'csv rows and chat lines seeded from pass 0');
+    assert.deepEqual(r.findings.findings.map((f) => f.title), ['real', 'snapped']);
+    const snapped = r.findings.findings[1];
+    assert.deepEqual(snapped.sources.map((s) => `${s.file}:${s.line}`), ['FLLD-CLIN-v2.md:28', 'teams-export.txt:9']);
+    assert.ok(snapped.sources.every((s) => s.verified && s.repaired), 'both mislabelled citations corrected from their excerpts');
+    assert.deepEqual(snapped.sources[1].cited_as, { file: 'teams-export.txt', line: 37 });
     assert.equal(r.findings.findings[0].id, 'F-01');
     assert.ok(r.findings.findings[0].sources.every((s) => s.verified === true));
     const reasons = Object.fromEntries(r.findings.dropped.map((d) => [d.id, d.reason]));
-    assert.match(reasons['FAKE-01'], /not on the cited line/);
-    assert.match(reasons['c2'], /not on the cited line/);
+    assert.match(reasons['FAKE-01'], /not anywhere in the corpus/);
+    assert.match(reasons['c2'], /not anywhere in the corpus/);
     assert.match(reasons['c3'], /one file/);
     assert.match(reasons['F-99'], /not verified/);
     const badScale = r.findings.dropped.find((d) => d.pass === 3 && d.reason.includes('unknown severity'));
