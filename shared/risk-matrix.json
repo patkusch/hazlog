@@ -1,11 +1,18 @@
 {
-  "_note": "DCB0160 risk acceptability matrix as reproduced in the NHS Digital Implementation Guidance. Severity and likelihood scales are the standard's; an organisation's Clinical Risk Management Plan (DCB0160 3.2.1) may define its own acceptability criteria. HAZLOG proposes a cell; it never confirms one.",
+  "_source": {
+    "document": "DCB0160 Clinical Risk Management: its Application in the Deployment and Use of Health IT Systems - Implementation Guidance v4.2, 02.05.2018 (for DCB0160 Amd 25/2018)",
+    "tables": "Table 7 Example Severity Classification (p.34), Table 8 Example Likelihood Classification (p.35), Table 9 Example Clinical Risk Matrix (p.35), Table 10 Example Risk Acceptability Definitions (p.37)",
+    "url": "https://digital.nhs.uk/binaries/content/assets/website-assets/data-and-information/information-standards/standards-and-collections/dcb0160/0160252018impguid.pdf",
+    "archived": "https://web.archive.org/web/20240420192632/https://digital.nhs.uk/binaries/content/assets/website-assets/data-and-information/information-standards/standards-and-collections/dcb0160/0160252018impguid.pdf",
+    "checked": "2026-09-03"
+  },
+  "_note": "The guidance labels all four tables 'Example' and says the classifications are illustrative: the Health Organisation decides its own in the Clinical Risk Management Plan (DCB0160 3.2.1, guidance 4.4). HAZLOG proposes a cell on this example matrix; it never confirms one. Severity definitions below summarise Table 7, which is organised by harm and by whether one or multiple patients are affected.",
   "severity": [
-    { "score": 1, "level": "Minor", "definition": "Minor injury or illness; minimal or no intervention required" },
-    { "score": 2, "level": "Significant", "definition": "Minor injury or illness requiring minor intervention, or significant psychological trauma" },
-    { "score": 3, "level": "Considerable", "definition": "Severe injury or illness requiring major intervention, or significant harm to a single patient" },
-    { "score": 4, "level": "Major", "definition": "Death of a single patient, or severe injury or illness to multiple patients" },
-    { "score": 5, "level": "Catastrophic", "definition": "Death of multiple patients" }
+    { "score": 1, "level": "Minor", "definition": "Minor injury from which recovery is expected in the short term; minor psychological upset; inconvenience; any negligible severity (single patient)" },
+    { "score": 2, "level": "Significant", "definition": "Minor injury from which recovery is not expected in the short term, or significant psychological trauma (single patient); minor injury with short-term recovery, or minor psychological upset or inconvenience (multiple patients)" },
+    { "score": 3, "level": "Considerable", "definition": "Severe injury or severe incapacity from which recovery is expected in the short term, or severe psychological trauma (single patient); minor injury from which recovery is not expected in the short term, or significant psychological trauma (multiple patients)" },
+    { "score": 4, "level": "Major", "definition": "Death, or permanent life-changing incapacity, or severe injury or incapacity from which recovery is not expected in the short term (single patient); severe injury or incapacity with short-term recovery, or severe psychological trauma (multiple patients)" },
+    { "score": 5, "level": "Catastrophic", "definition": "Death, or permanent life-changing incapacity, or severe injury or incapacity from which recovery is not expected in the short term (multiple patients)" }
   ],
   "likelihood": [
     { "score": 1, "level": "Very low", "definition": "Negligible or nearly negligible possibility of occurring" },
@@ -23,9 +30,10 @@
   },
   "acceptability": {
     "5": "Unacceptable level of risk",
-    "4": "Mandatory elimination of hazard or addition of control measure to reduce risk to an acceptable level",
-    "3": "Undesirable level of risk. Attempts should be made to eliminate the hazard or implement control measures to reduce risk to an acceptable level. Shall only be acceptable when further risk reduction is impractical",
-    "2": "Acceptable where cost of further reduction outweighs benefits gained",
+    "4": "Mandatory elimination of hazards or addition of control measures to reduce risk to an acceptable level",
+    "3": "Undesirable level of risk. Attempts should be made to eliminate the hazards or implement control measures to reduce risk to an acceptable level. Shall only be acceptable when further risk reduction is impractical",
+    "2": "Acceptable where cost of further reduction outweighs benefits gained or where further risk reduction is impractical",
     "1": "Acceptable, no further action required"
-  }
+  },
+  "hazard_log_columns_table2": ["Hazard Number", "Hazard Name", "Hazard Description", "Potential Clinical Impact", "Possible Causes", "Existing Controls", "Initial Hazard Risk Assessment: Severity, Likelihood, Risk Rating", "Additional Controls: Design, Test, Training, Business Process Change", "Residual Hazard Risk Assessment: Severity, Likelihood, Risk Rating", "Actions: Summary, Owner", "Hazard Status"]
 }

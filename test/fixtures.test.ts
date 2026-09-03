@@ -67,6 +67,14 @@ describe('out/hazard-log.json', () => {
     }
     assert.match(hazardLog.run.note, /Clinical Safety Officer/);
   });
+  test('the matrix is Table 9 of the DCB0160 Implementation Guidance v4.2, cell for cell', () => {
+    assert.deepEqual(MATRIX.matrix_rows_likelihood_cols_severity, { '1': [1,1,2,2,3], '2': [1,2,2,3,4], '3': [2,2,3,3,4], '4': [2,3,3,4,5], '5': [3,4,4,5,5] });
+    assert.deepEqual(MATRIX.severity.map((s) => s.level), ['Minor','Significant','Considerable','Major','Catastrophic']);
+    assert.deepEqual(MATRIX.likelihood.map((l) => l.level), ['Very low','Low','Medium','High','Very high']);
+    assert.equal(MATRIX.acceptability['5'], 'Unacceptable level of risk');
+    assert.equal(MATRIX.acceptability['1'], 'Acceptable, no further action required');
+    assert.match(MATRIX.acceptability['3'], /^Undesirable level of risk/);
+  });
   test('the matrix is a complete 5x5 with values 1..5, monotone in both directions', () => {
     for (let l = 1; l <= 5; l++) {
       const row = MATRIX.matrix_rows_likelihood_cols_severity[String(l)];

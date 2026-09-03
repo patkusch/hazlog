@@ -33,7 +33,7 @@ No role in the programme reads all four artefacts as one corpus.
 DCB0160 (Amd 25/2018, v3.2), mandated under section 250 of the Health and Social Care Act 2012, requires the deploying organisation to:
 
 - identify and document known and foreseeable hazards to patients, in normal and fault conditions (4.3.1)
-- estimate severity, likelihood and clinical risk for each one (4.4.1)
+- estimate severity, likelihood and clinical risk for each one (4.4.1), recorded in the Hazard Log (guidance 4.4.2)
 - keep a Hazard Log, each version approved by a Clinical Safety Officer who is a suitably qualified clinician (3.3.1, 3.3.2, 2.3.1)
 - record every decision that influences clinical risk in the Clinical Risk Management File (3.1.4)
 
@@ -133,7 +133,7 @@ For `make run`: install [Ollama](https://ollama.com), then `ollama pull gemma3`.
 - **Severity and likelihood are proposals.** The rating is computed from the matrix, never asserted by the model, and none of it is a hazard log entry until a named CSO signs. The UI records the signature in the browser only.
 - **The fixture is the demo.** `out/hazard-log.json` and `out/findings.json` are committed, and `make test` holds them to the same rule as a live run: every excerpt must resolve to its line, every finding must span two files. The local Gemma path is wired, schema-constrained and exercised end to end against a fake Ollama on loopback that returns canned output containing a fabricated citation, a single-file finding and an off-scale severity; `test/pipeline.test.ts` asserts all three are dropped with a reason and the real one survives. It has not been run against a live model on the machine this was built on, because Ollama was not installed there. Run `make run` and the engine badge changes from FIXTURE to GEMMA_LOCAL.
 - **Four artefacts.** Cross-document detection at this corpus size fits in one context window. Beyond that it needs chunking and a second pass over pairs, and that is not built.
-- **The risk matrix wording** in `shared/risk-matrix.json` reproduces the DCB0160 Implementation Guidance as it is commonly published by NHS clinical safety teams. Clause numbers above are from the Requirements Specification v3.2. Check both against the controlled copy on the NHS England site before relying on them; an organisation's own Clinical Risk Management Plan (3.2.1) may define different acceptability criteria.
+- **The risk matrix** in `shared/risk-matrix.json` is Tables 7 to 10 of the DCB0160 Implementation Guidance v4.2 (02.05.2018), checked cell for cell against the official PDF on 3 September 2026 and pinned by a test. The guidance calls those tables *examples*: an organisation's own Clinical Risk Management Plan (3.2.1) defines the criteria it actually uses, so a trust would swap in its own. Clause numbers are from the Requirements Specification v3.2.
 - **The Gemini lookup** is one function and has not been exercised against a live key here. It is tested with a fake fetch that captures the request and checks no corpus line is in it.
 - **Not wired:** live ingestion from Confluence, Jira or Teams; diagrams; residual-risk assessment; a persistent hazard log beyond the browser.
 

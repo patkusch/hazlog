@@ -141,9 +141,9 @@
       </div>
       <div class="entry">
         <h3>Hazard log entry · ${esc(log.run.standard.id)} ${esc(log.run.standard.amendment)} · proposed</h3>
-        <div class="sub">Initial assessment is pre-filled by HAZLOG and unconfirmed. Residual assessment is left blank on purpose: it follows controls the CSO has accepted, and is not automated.</div>
+        <div class="sub">Initial assessment is pre-filled by HAZLOG and unconfirmed. Residual assessment is left blank on purpose: it follows controls the CSO has accepted, and is not automated. Columns follow Table 2 of the Implementation Guidance.</div>
         <table class="log">
-          <tr><th>Hazard ID</th><td class="mono">${esc(e.hazard_id)}</td></tr>
+          <tr><th>Hazard number</th><td class="mono">${esc(e.hazard_id)}</td></tr>
           <tr><th>Hazard name</th><td>${esc(e.hazard_name)}</td></tr>
           <tr><th>Hazard description</th><td>${esc(e.hazard_description)}</td></tr>
           <tr><th>Possible causes</th><td><ul>${e.causes.map(c => `<li>${esc(c)}</li>`).join('')}</ul></td></tr>
@@ -154,10 +154,10 @@
           <tr><th>Initial risk rating (computed)</th><td><span class="chip r${r.rating}">risk ${r.rating}</span> <span class="def">${esc(r.acceptability)}</span></td></tr>
           <tr><th>Additional controls (proposed)</th><td><ul>${e.proposed_controls.map(c => `<li>${esc(c)}</li>`).join('')}</ul></td></tr>
           <tr><th>Residual severity / likelihood / risk</th><td class="def">Not automated. Set by the CSO after controls are accepted.</td></tr>
-          <tr><th>Owner (proposed)</th><td>${esc(e.proposed_owner_role)}</td></tr>
+          <tr><th>Actions: owner (proposed)</th><td>${esc(e.proposed_owner_role)}</td></tr>
           <tr><th>Evidence</th><td class="mono">${e.evidence.map(c => `${esc(c.file)}:${c.line}`).join(' · ')}</td></tr>
           <tr><th>Standard references</th><td>${e.standard_refs.map(s => `<div>${esc(s)}</div>`).join('')}</td></tr>
-          <tr><th>Status</th><td>${statusChip(e)}</td></tr>
+          <tr><th>Hazard status</th><td>${statusChip(e)}</td></tr>
         </table>
       </div>
       <div class="signoff">
