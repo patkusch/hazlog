@@ -4,6 +4,8 @@
 
 `make demo` · no network, no model, no key · [what you'll see](#what-youll-see) · [limits](#limits)
 
+[![HZ-001: two approved designs side by side, the contradicting lines highlighted, the DCB0160 hazard log entry beneath](./docs/hazlog-hz001.png)](./docs/hazlog-hz001.png)
+
 ---
 
 ## The room
@@ -129,7 +131,7 @@ For `make run`: install [Ollama](https://ollama.com), then `ollama pull gemma3`.
 
 - **The corpus is synthetic.** Four artefacts, written for this demo to contain five defects. It is shaped like a real programme's artefacts; it is not one.
 - **Severity and likelihood are proposals.** The rating is computed from the matrix, never asserted by the model, and none of it is a hazard log entry until a named CSO signs. The UI records the signature in the browser only.
-- **The fixture is the demo.** `out/hazard-log.json` and `out/findings.json` are committed, and `make test` holds them to the same rule as a live run: every excerpt must resolve to its line, every finding must span two files. The local Gemma path is wired, schema-constrained and tested against a refused non-local host, but it has not been run end to end on the machine this was built on, because Ollama was not installed there. Run `make run` and the engine badge changes from FIXTURE to GEMMA_LOCAL.
+- **The fixture is the demo.** `out/hazard-log.json` and `out/findings.json` are committed, and `make test` holds them to the same rule as a live run: every excerpt must resolve to its line, every finding must span two files. The local Gemma path is wired, schema-constrained and exercised end to end against a fake Ollama on loopback that returns canned output containing a fabricated citation, a single-file finding and an off-scale severity; `test/pipeline.test.ts` asserts all three are dropped with a reason and the real one survives. It has not been run against a live model on the machine this was built on, because Ollama was not installed there. Run `make run` and the engine badge changes from FIXTURE to GEMMA_LOCAL.
 - **Four artefacts.** Cross-document detection at this corpus size fits in one context window. Beyond that it needs chunking and a second pass over pairs, and that is not built.
 - **The risk matrix wording** in `shared/risk-matrix.json` reproduces the DCB0160 Implementation Guidance as it is commonly published by NHS clinical safety teams. Clause numbers above are from the Requirements Specification v3.2. Check both against the controlled copy on the NHS England site before relying on them; an organisation's own Clinical Risk Management Plan (3.2.1) may define different acceptability criteria.
 - **The Gemini lookup** is one function and has not been exercised against a live key here. It is tested with a fake fetch that captures the request and checks no corpus line is in it.

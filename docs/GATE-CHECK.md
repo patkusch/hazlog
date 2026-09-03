@@ -23,7 +23,7 @@ The ten criteria from the build spec, and where each one is satisfied in this re
 
 ## Not done
 
-- **Live Gemma run.** Ollama was not installed on the build machine. The local path is wired, schema-constrained and tested against a refused non-local host; it has not produced a run. `make run` will, and the engine badge will read `GEMMA_LOCAL`.
+- **Live Gemma run.** Ollama was not installed on the build machine. The local path is wired, schema-constrained and run end to end against a fake Ollama (`test/pipeline.test.ts`), which proves the drop rule but not model quality; it has not produced a run from a real model. `make run` will, and the engine badge will read `GEMMA_LOCAL`.
 - **Risk matrix wording.** `shared/risk-matrix.json` reproduces the DCB0160 Implementation Guidance as commonly published; the controlled copy on the NHS England site blocks automated fetches, and the one third-party safety case that reproduces the tables does so as images. Check it against the controlled copy before submission.
-- **Demo recording.** None yet.
+- **Demo recording.** A screenshot (`docs/hazlog-hz001.png`); no video yet.
 - Live ingestion, diagrams, residual risk, a persistent hazard log.

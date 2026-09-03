@@ -1,0 +1,36 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: tests (verifier, fixtures, boundary, pre-pass, pipeline against a fake Ollama)
+        run: make test
+      - name: pre-pass is deterministic and matches the committed index
+        run: |
+          cp out/index.json /tmp/index.committed.json
+          make prepass
+          node -e "
+            const a=require('/tmp/index.committed.json'), b=require('./out/index.json');
+            delete a.generated_at; delete b.generated_at; delete a.corpus_dir; delete b.corpus_dir;
+            if (JSON.stringify(a)!==JSON.stringify(b)) { console.error('out/index.json is stale: run make prepass and commit'); process.exit(1); }
+            console.log('index matches corpus');"
+      - name: demo boots with no network and serves the fixtures
+        run: |
+          node server.mjs & PID=$!
+          sleep 1
+          curl -sf http://127.0.0.1:4173/ | grep -q '<title>HAZLOG</title>'
+          curl -sf http://127.0.0.1:4173/out/hazard-log.json | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);if(j.entries.length<1)process.exit(1);console.log(j.entries.length,'entries')})"
+          curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:4173/src/gemini.ts | grep -q 403
+          curl -s -o /dev/null -w '%{http_code}\n' 'http://127.0.0.1:4173/corpus/../package.json' | grep -qE '403|404'
+          kill $PID
+      - name: no secrets committed
+        run: |
+          ! git grep -nE 'AIza[0-9A-Za-z_-]{30,}|sk-[A-Za-z0-9]{20,}' -- . ':!.github/workflows/ci.yml'
