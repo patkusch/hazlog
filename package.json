@@ -1,0 +1,16 @@
+{
+  "name": "hazlog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cross-document clinical hazard detection for DCB0160. Local Gemma reads the corpus; Gemini sees only isolated terms.",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "demo": "node server.mjs",
+    "prepass": "node src/prepass.ts corpus out/index.json",
+    "run": "node src/run.ts --corpus corpus --out out",
+    "test": "node --test test/*.test.ts",
+    "lookup": "node src/gemini.ts"
+  },
+  "license": "MIT"
+}

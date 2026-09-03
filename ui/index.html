@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HAZLOG</title>
+<style>
+  :root { --bg:#f6f6f3; --panel:#fff; --ink:#1b1b1b; --muted:#6b6b66; --line:#dcdcd6; --hi:#fff1a8; --hi-border:#e0b400; --accent:#0b5fff; --ok:#1f8a4c; --warn:#b45309; --bad:#b91c1c; --r1:#2e7d32; --r2:#558b2f; --r3:#c77700; --r4:#d84315; --r5:#b71c1c; }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif }
+  code, .mono { font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12.5px }
+  header { display:flex; align-items:center; gap:18px; padding:12px 20px; background:#111; color:#eee; }
+  header h1 { margin:0; font-size:18px; letter-spacing:.12em }
+  header .tag { color:#aaa; font-size:13px }
+  header .badges { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
+  .badge { border:1px solid #444; border-radius:4px; padding:3px 8px; font-size:12px; color:#ddd; background:#1c1c1c }
+  .badge.ok { border-color:#2e7d32; color:#9be7a8 }
+  .badge.fx { border-color:#8a6d00; color:#ffd966 }
+  .layout { display:grid; grid-template-columns:320px 1fr; min-height:calc(100vh - 50px) }
+  nav { border-right:1px solid var(--line); background:#fbfbf9; padding:14px 12px; overflow:auto }
+  nav h2 { font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin:6px 6px 10px }
+  .hz { display:block; width:100%; text-align:left; border:1px solid var(--line); background:var(--panel); border-radius:6px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font:inherit; color:inherit }
+  .hz.active { border-color:var(--accent); box-shadow:0 0 0 2px #dbe7ff }
+  .hz .id { font-weight:600 } .hz .name { display:block; margin:3px 0 6px; color:#333 }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; align-items:center }
+  .chip { display:inline-block; border-radius:4px; padding:1px 7px; font-size:11.5px; border:1px solid var(--line); background:#f3f3ef; color:#333 }
+  .chip.r1{background:#e8f5e9;border-color:var(--r1);color:var(--r1)} .chip.r2{background:#f1f8e9;border-color:var(--r2);color:var(--r2)} .chip.r3{background:#fff4e0;border-color:var(--r3);color:var(--r3)} .chip.r4{background:#fbe9e7;border-color:var(--r4);color:var(--r4)} .chip.r5{background:#ffebee;border-color:var(--r5);color:var(--r5)}
+  .chip.status { background:#fff8db; border-color:#e0b400; color:#7a5a00 } .chip.status.signed { background:#e8f5e9; border-color:var(--ok); color:var(--ok) } .chip.status.rejected { background:#ffebee; border-color:var(--bad); color:var(--bad) }
+  main { padding:18px 22px 60px; overflow:auto }
+  .titlebar { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:12px }
+  .titlebar h2 { margin:0; font-size:20px }
+  .panes { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px }
+  .pane { background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; display:flex; flex-direction:column; height:360px }
+  .pane .ph { display:flex; gap:8px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--line); background:#fafaf7; font-size:12.5px }
+  .pane .ph .file { font-weight:600 } .pane .ph .v { color:var(--ok); font-weight:600; margin-left:auto }
+  .pane .body { overflow:auto; padding:6px 0; flex:1 }
+  .ln { display:grid; grid-template-columns:44px 1fr; gap:8px; padding:1px 10px; white-space:pre-wrap; word-break:break-word }
+  .ln .n { color:#aaa; text-align:right; user-select:none } .ln.hit { background:var(--hi); border-left:4px solid var(--hi-border); padding-left:6px }
+  .ln.hit mark { background:#ffd54f; padding:0 1px }
+  .evidence { margin:6px 0 18px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--muted) }
+  .cite { border:1px solid var(--line); background:var(--panel); border-radius:4px; padding:2px 8px; cursor:pointer; font:inherit; font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#222 }
+  .cite:hover { border-color:var(--accent) }
+  .entry { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px 18px; margin-bottom:14px }
+  .entry h3 { margin:0 0 4px; font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted) }
+  .entry .sub { color:var(--muted); font-size:12.5px; margin-bottom:10px }
+  table.log { width:100%; border-collapse:collapse } table.log th, table.log td { text-align:left; vertical-align:top; padding:7px 8px; border-top:1px solid #eee } table.log th { width:220px; color:#444; font-weight:600; font-size:12.5px } table.log ul { margin:0; padding-left:18px }
+  .def { color:var(--muted); font-size:12px }
+  .signoff { background:#fffdf3; border:1px solid #e0b400; border-radius:8px; padding:14px 18px; margin-bottom:14px }
+  .signoff h3 { margin:0 0 4px; font-size:14px } .signoff .sub { color:var(--muted); font-size:12.5px; margin-bottom:10px }
+  .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end } .row label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:#444 }
+  select, input[type=text] { font:inherit; padding:6px 8px; border:1px solid var(--line); border-radius:4px; background:#fff; min-width:160px }
+  button.primary { font:inherit; background:#111; color:#fff; border:0; border-radius:4px; padding:8px 14px; cursor:pointer } button.ghost { font:inherit; background:#fff; border:1px solid var(--line); border-radius:4px; padding:8px 12px; cursor:pointer }
+  .signed { border:1px solid var(--ok); background:#f1faf3; border-radius:6px; padding:10px 12px; margin-top:8px }
+  .rej { border:1px solid var(--bad); background:#fff5f5; border-radius:6px; padding:10px 12px; margin-top:8px }
+  .small { font-size:12px; color:var(--muted) }
+  .dropped { margin-top:16px } .dropped details { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px }
+  textarea { width:100%; height:200px; font-family:ui-monospace,Menlo,monospace; font-size:12px; margin-top:8px }
+  footer { padding:12px 22px; color:var(--muted); font-size:12px; border-top:1px solid var(--line) }
+  @media (max-width: 900px) { .layout { grid-template-columns:1fr } nav { border-right:0; border-bottom:1px solid var(--line) } .panes { grid-template-columns:1fr } }
+</style>
+</head>
+<body>
+<header>
+  <h1>HAZLOG</h1>
+  <span class="tag">Two approved documents. One patient. The hazard between them, cited to the line.</span>
+  <div class="badges" id="badges"></div>
+</header>
+<div class="layout">
+  <nav>
+    <h2>Proposed hazard log entries</h2>
+    <div id="list"></div>
+    <p class="small" style="margin:14px 6px">Every entry is a proposal. Severity and likelihood are pre-filled and unconfirmed until a Clinical Safety Officer signs (DCB0160 3.3.2).</p>
+    <button class="ghost" id="exportBtn" style="margin:0 6px">Export signed entries (JSON)</button>
+    <textarea id="exportBox" hidden></textarea>
+  </nav>
+  <main id="main"><p class="small">Loading…</p></main>
+</div>
+<footer>HAZLOG proposes. The Clinical Safety Officer decides. The corpus on this page is synthetic, written for the demo. Nothing on this page has left this machine.</footer>
+<script>
+(async function () {
+  const [log, findings, index, matrix] = await Promise.all(['/out/hazard-log.json','/out/findings.json','/out/index.json','/shared/risk-matrix.json'].map(u => fetch(u).then(r => r.json())));
+  const corpusCache = {};
+  async function fileLines(f) { if (!corpusCache[f]) corpusCache[f] = (await fetch('/corpus/' + encodeURIComponent(f)).then(r => r.text())).replace(/\r\n/g,'\n').replace(/\n$/,'').split('\n'); return corpusCache[f]; }
+  const sev = l => matrix.severity.find(s => s.level.toLowerCase() === l.toLowerCase());
+  const lik = l => matrix.likelihood.find(s => s.level.toLowerCase() === l.toLowerCase());
+  const rate = (s, l) => { const r = matrix.matrix_rows_likelihood_cols_severity[String(lik(l).score)][sev(s).score - 1]; return { rating: r, acceptability: matrix.acceptability[String(r)] }; };
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const store = { get: id => { try { return JSON.parse(localStorage.getItem('hazlog.signoff.' + id) || 'null'); } catch { return null; } }, set: (id, v) => { try { v ? localStorage.setItem('hazlog.signoff.' + id, JSON.stringify(v)) : localStorage.removeItem('hazlog.signoff.' + id); } catch {} } };
+
+  // Header badges: what engine produced this, and why the corpus is local.
+  const pii = index.identifiable_data.reduce((a, x) => (a[x.kind] = (a[x.kind] || 0) + 1, a), {});
+  const piiTotal = index.identifiable_data.length;
+  document.getElementById('badges').innerHTML =
+    `<span class="badge ${log.run.engine === 'FIXTURE' ? 'fx' : 'ok'}">engine: ${esc(log.run.engine)}${log.run.model ? ' · ' + esc(log.run.model) : ' (seeded)'}</span>` +
+    `<span class="badge ok">corpus: local only</span>` +
+    `<span class="badge" title="${esc(Object.entries(pii).map(([k,v]) => k + ': ' + v).join(', '))}">pass 0 flagged ${piiTotal} identifiable-data locations</span>` +
+    `<span class="badge">${esc(log.run.standard.id)} ${esc(log.run.standard.amendment)}</span>`;
+
+  let current = 0;
+  const entries = log.entries;
+  function statusOf(e) { const s = store.get(e.hazard_id); return s ? (s.decision === 'reject' ? 'rejected' : 'signed') : 'proposed'; }
+  function statusChip(e) { const s = statusOf(e); return `<span class="chip status ${s}">${s === 'proposed' ? 'PROPOSED · requires CSO sign-off' : s === 'signed' ? 'SIGNED by ' + esc(store.get(e.hazard_id).by) : 'REJECTED by ' + esc(store.get(e.hazard_id).by)}</span>`; }
+
+  function renderList() {
+    document.getElementById('list').innerHTML = entries.map((e, i) => {
+      const r = rate(e.proposed_severity, e.proposed_likelihood);
+      return `<button class="hz ${i === current ? 'active' : ''}" data-i="${i}"><span class="id">${esc(e.hazard_id)}</span><span class="name">${esc(e.hazard_name)}</span><span class="chips"><span class="chip r${r.rating}">risk ${r.rating}</span><span class="chip">${esc(e.proposed_severity)} · ${esc(e.proposed_likelihood)}</span>${statusChip(e)}</span></button>`;
+    }).join('');
+    document.querySelectorAll('.hz').forEach(b => b.onclick = () => { current = Number(b.dataset.i); renderList(); renderMain(); });
+  }
+
+  async function renderPane(el, cite) {
+    const lines = await fileLines(cite.file);
+    const n = cite.line, text = lines[n - 1] ?? '';
+    const i = text.toLowerCase().indexOf(String(cite.excerpt).toLowerCase());
+    const marked = i >= 0 ? esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + cite.excerpt.length)) + '</mark>' + esc(text.slice(i + cite.excerpt.length)) : esc(text);
+    el.innerHTML = `<div class="ph"><span class="file">${esc(cite.file)}</span><span class="mono">line ${n}</span><span class="v">${cite.verified === false ? '✗ not verified' : '✓ verified in code'}</span></div><div class="body">` +
+      lines.map((t, k) => `<div class="ln ${k + 1 === n ? 'hit' : ''}" id="${el.id}-l${k + 1}"><span class="n">${k + 1}</span><span>${k + 1 === n ? marked : esc(t) || ' '}</span></div>`).join('') + '</div>';
+    const hit = el.querySelector('.hit'); if (hit) hit.scrollIntoView({ block: 'center' });
+  }
+
+  function twoPanes(e) {
+    const a = e.evidence[0];
+    const b = e.evidence.find(x => x.file !== a.file) || e.evidence[1];
+    return [a, b];
+  }
+
+  async function renderMain() {
+    const e = entries[current];
+    if (!e) { document.getElementById('main').innerHTML = '<p>No hazard entries in out/hazard-log.json.</p>'; return; }
+    const f = findings.findings.find(x => x.id === e.finding_id) || {};
+    const r = rate(e.proposed_severity, e.proposed_likelihood);
+    const so = store.get(e.hazard_id);
+    const [pa, pb] = twoPanes(e);
+    const main = document.getElementById('main');
+    main.innerHTML = `
+      <div class="titlebar"><h2>${esc(e.hazard_id)} · ${esc(e.hazard_name)}</h2>${statusChip(e)}<span class="chip">finding ${esc(e.finding_id)} · ${esc(f.type || '')}</span></div>
+      <div class="panes"><div class="pane" id="paneA"></div><div class="pane" id="paneB"></div></div>
+      <div class="evidence">Evidence (${e.evidence.length}, every one checked against the source line):
+        ${e.evidence.map((c, i) => `<button class="cite" data-i="${i}" title="${esc(c.excerpt)}">${esc(c.file)}:${c.line} ${c.verified === false ? '✗' : '✓'}</button>`).join('')}
+      </div>
+      <div class="entry">
+        <h3>Hazard log entry · ${esc(log.run.standard.id)} ${esc(log.run.standard.amendment)} · proposed</h3>
+        <div class="sub">Initial assessment is pre-filled by HAZLOG and unconfirmed. Residual assessment is left blank on purpose: it follows controls the CSO has accepted, and is not automated.</div>
+        <table class="log">
+          <tr><th>Hazard ID</th><td class="mono">${esc(e.hazard_id)}</td></tr>
+          <tr><th>Hazard name</th><td>${esc(e.hazard_name)}</td></tr>
+          <tr><th>Hazard description</th><td>${esc(e.hazard_description)}</td></tr>
+          <tr><th>Possible causes</th><td><ul>${e.causes.map(c => `<li>${esc(c)}</li>`).join('')}</ul></td></tr>
+          <tr><th>Potential clinical impact</th><td>${esc(e.clinical_effect)}</td></tr>
+          <tr><th>Existing controls</th><td><ul>${e.existing_controls.map(c => `<li>${esc(c)}</li>`).join('')}</ul></td></tr>
+          <tr><th>Initial severity (proposed)</th><td><b>${esc(e.proposed_severity)}</b> (${sev(e.proposed_severity).score}) <span class="def">${esc(sev(e.proposed_severity).definition)}</span>${e.severity_rationale ? `<div class="def">Rationale: ${esc(e.severity_rationale)}</div>` : ''}</td></tr>
+          <tr><th>Initial likelihood (proposed)</th><td><b>${esc(e.proposed_likelihood)}</b> (${lik(e.proposed_likelihood).score}) <span class="def">${esc(lik(e.proposed_likelihood).definition)}</span>${e.likelihood_rationale ? `<div class="def">Rationale: ${esc(e.likelihood_rationale)}</div>` : ''}</td></tr>
+          <tr><th>Initial risk rating (computed)</th><td><span class="chip r${r.rating}">risk ${r.rating}</span> <span class="def">${esc(r.acceptability)}</span></td></tr>
+          <tr><th>Additional controls (proposed)</th><td><ul>${e.proposed_controls.map(c => `<li>${esc(c)}</li>`).join('')}</ul></td></tr>
+          <tr><th>Residual severity / likelihood / risk</th><td class="def">Not automated. Set by the CSO after controls are accepted.</td></tr>
+          <tr><th>Owner (proposed)</th><td>${esc(e.proposed_owner_role)}</td></tr>
+          <tr><th>Evidence</th><td class="mono">${e.evidence.map(c => `${esc(c.file)}:${c.line}`).join(' · ')}</td></tr>
+          <tr><th>Standard references</th><td>${e.standard_refs.map(s => `<div>${esc(s)}</div>`).join('')}</td></tr>
+          <tr><th>Status</th><td>${statusChip(e)}</td></tr>
+        </table>
+      </div>
+      <div class="signoff">
+        <h3>Clinical Safety Officer sign-off</h3>
+        <div class="sub">DCB0160 2.3.1: a suitably qualified and experienced clinician. HAZLOG does not decide severity or likelihood; it proposes them. Confirm, amend or reject.</div>
+        ${so ? (so.decision === 'reject'
+          ? `<div class="rej"><b>Rejected</b> by ${esc(so.by)} on ${esc(so.at)}. ${esc(so.reason || '')} <button class="ghost" id="reopen">Reopen</button></div>`
+          : `<div class="signed"><b>Signed</b> by ${esc(so.by)} on ${esc(so.at)} as <b>${esc(so.severity)} · ${esc(so.likelihood)}</b> → <span class="chip r${so.rating}">risk ${so.rating}</span>${so.amended ? ` <span class="small">(amended from proposed ${esc(e.proposed_severity)} · ${esc(e.proposed_likelihood)})</span>` : ' <span class="small">(as proposed)</span>'} <button class="ghost" id="reopen">Reopen</button></div>`)
+        : `<div class="row">
+            <label>Severity<select id="soSev">${matrix.severity.map(s => `<option ${s.level === e.proposed_severity ? 'selected' : ''}>${s.level}</option>`).join('')}</select></label>
+            <label>Likelihood<select id="soLik">${matrix.likelihood.map(s => `<option ${s.level === e.proposed_likelihood ? 'selected' : ''}>${s.level}</option>`).join('')}</select></label>
+            <label>Resulting rating<span id="soRate" class="chip r${r.rating}" style="padding:6px 10px">risk ${r.rating}</span></label>
+            <label>Clinical Safety Officer<input type="text" id="soBy" placeholder="Name, registration"></label>
+            <button class="primary" id="soConfirm">Sign entry</button>
+            <button class="ghost" id="soReject">Reject</button>
+          </div>
+          <p class="small" id="soHint">Pre-filled with HAZLOG's proposal. Nothing is recorded until you sign.</p>`}
+      </div>
+      <div class="dropped"><details><summary>Discarded by the verifier: ${(findings.dropped || []).length} candidate${(findings.dropped || []).length === 1 ? '' : 's'}</summary>
+        ${(findings.dropped || []).length ? '<ul>' + findings.dropped.map(d => `<li><span class="mono">pass ${d.pass} · ${esc(d.id)}</span> — ${esc(d.reason)}</li>`).join('') + '</ul>' : '<p class="small">A finding whose citation does not resolve to its line is dropped before it reaches this page. This run dropped none.</p>'}
+      </details></div>`;
+
+    await Promise.all([renderPane(document.getElementById('paneA'), pa), renderPane(document.getElementById('paneB'), pb)]);
+    main.querySelectorAll('.cite').forEach(b => b.onclick = () => {
+      const c = e.evidence[Number(b.dataset.i)];
+      const A = document.getElementById('paneA'), B = document.getElementById('paneB');
+      const target = (A.querySelector('.file')?.textContent === c.file) ? A : (B.querySelector('.file')?.textContent === c.file ? B : B);
+      renderPane(target, c);
+    });
+    const soSev = document.getElementById('soSev'), soLik = document.getElementById('soLik');
+    if (soSev) {
+      const upd = () => { const rr = rate(soSev.value, soLik.value); const el = document.getElementById('soRate'); el.className = 'chip r' + rr.rating; el.textContent = 'risk ' + rr.rating; el.title = rr.acceptability; };
+      soSev.onchange = soLik.onchange = upd;
+      document.getElementById('soConfirm').onclick = () => {
+        const by = document.getElementById('soBy').value.trim();
+        if (!by) { document.getElementById('soHint').textContent = 'A named Clinical Safety Officer is required to sign.'; return; }
+        const rr = rate(soSev.value, soLik.value);
+        store.set(e.hazard_id, { decision: 'confirm', by, at: new Date().toISOString().slice(0, 16).replace('T', ' '), severity: soSev.value, likelihood: soLik.value, rating: rr.rating, amended: soSev.value !== e.proposed_severity || soLik.value !== e.proposed_likelihood });
+        renderList(); renderMain();
+      };
+      document.getElementById('soReject').onclick = () => {
+        const by = document.getElementById('soBy').value.trim();
+        if (!by) { document.getElementById('soHint').textContent = 'A named Clinical Safety Officer is required to reject.'; return; }
+        const reason = prompt('Reason for rejecting this proposed hazard (recorded with the decision):') || '';
+        store.set(e.hazard_id, { decision: 'reject', by, at: new Date().toISOString().slice(0, 16).replace('T', ' '), reason });
+        renderList(); renderMain();
+      };
+    }
+    const reopen = document.getElementById('reopen'); if (reopen) reopen.onclick = () => { store.set(e.hazard_id, null); renderList(); renderMain(); };
+  }
+
+  document.getElementById('exportBtn').onclick = () => {
+    const box = document.getElementById('exportBox');
+    const signed = entries.map(e => ({ entry: e, signoff: store.get(e.hazard_id) })).filter(x => x.signoff && x.signoff.decision === 'confirm')
+      .map(({ entry, signoff }) => ({ ...entry, confirmed_severity: signoff.severity, confirmed_likelihood: signoff.likelihood, risk_rating: signoff.rating, signed_by: signoff.by, signed_at: signoff.at, status: 'SIGNED' }));
+    box.hidden = false;
+    box.value = JSON.stringify({ standard: log.run.standard, note: 'Only entries signed by a named Clinical Safety Officer are exported. Proposed entries are not hazard log entries.', entries: signed }, null, 2);
+    box.select();
+  };
+
+  renderList(); renderMain();
+})();
+</script>
+</body>
+</html>

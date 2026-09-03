@@ -1,0 +1,31 @@
+{
+  "_note": "DCB0160 risk acceptability matrix as reproduced in the NHS Digital Implementation Guidance. Severity and likelihood scales are the standard's; an organisation's Clinical Risk Management Plan (DCB0160 3.2.1) may define its own acceptability criteria. HAZLOG proposes a cell; it never confirms one.",
+  "severity": [
+    { "score": 1, "level": "Minor", "definition": "Minor injury or illness; minimal or no intervention required" },
+    { "score": 2, "level": "Significant", "definition": "Minor injury or illness requiring minor intervention, or significant psychological trauma" },
+    { "score": 3, "level": "Considerable", "definition": "Severe injury or illness requiring major intervention, or significant harm to a single patient" },
+    { "score": 4, "level": "Major", "definition": "Death of a single patient, or severe injury or illness to multiple patients" },
+    { "score": 5, "level": "Catastrophic", "definition": "Death of multiple patients" }
+  ],
+  "likelihood": [
+    { "score": 1, "level": "Very low", "definition": "Negligible or nearly negligible possibility of occurring" },
+    { "score": 2, "level": "Low", "definition": "Could occur but in the great majority of occasions will not" },
+    { "score": 3, "level": "Medium", "definition": "Possible" },
+    { "score": 4, "level": "High", "definition": "Not certain but very possible; reasonably expected to occur in the majority of cases" },
+    { "score": 5, "level": "Very high", "definition": "Certain or almost certain; highly likely to occur" }
+  ],
+  "matrix_rows_likelihood_cols_severity": {
+    "1": [1, 1, 2, 2, 3],
+    "2": [1, 2, 2, 3, 4],
+    "3": [2, 2, 3, 3, 4],
+    "4": [2, 3, 3, 4, 5],
+    "5": [3, 4, 4, 5, 5]
+  },
+  "acceptability": {
+    "5": "Unacceptable level of risk",
+    "4": "Mandatory elimination of hazard or addition of control measure to reduce risk to an acceptable level",
+    "3": "Undesirable level of risk. Attempts should be made to eliminate the hazard or implement control measures to reduce risk to an acceptable level. Shall only be acceptable when further risk reduction is impractical",
+    "2": "Acceptable where cost of further reduction outweighs benefits gained",
+    "1": "Acceptable, no further action required"
+  }
+}

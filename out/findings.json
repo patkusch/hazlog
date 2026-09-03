@@ -1,0 +1,99 @@
+{
+  "run": {
+    "engine": "FIXTURE",
+    "note": "Seeded demo fixture. Every excerpt below is verified against corpus/ by test/fixtures.test.ts. Regenerate with `make run` once Ollama and a Gemma model are installed.",
+    "model": null,
+    "timestamp": "2026-09-03T18:00:00Z",
+    "corpus_files": ["FLLD-CLIN-v2.md", "FLLD-DM-v3.md", "field-mapping.csv", "teams-export.txt"]
+  },
+  "requirements": [
+    { "id": "DM-04-R02", "statement": "Unmapped legacy allergens are coded 716186003 (No known allergy).", "file": "FLLD-DM-v3.md", "line": 23, "excerpt": "Unmapped items shall be assigned SNOMED code 716186003 (No known allergy)", "author": "David Vance", "date": "14-Jan-2026", "status": "APPROVED", "workstream": "Data Migration" },
+    { "id": "DM-04-R03", "statement": "Migrated allergy records are visible and active in the clinical panel at go-live.", "file": "FLLD-DM-v3.md", "line": 26, "excerpt": "All migrated allergy records shall be rendered immediately visible and active", "author": "David Vance", "date": "14-Jan-2026", "status": "APPROVED", "workstream": "Data Migration" },
+    { "id": "DM-04-R04", "statement": "Severity is inferred from legacy free text by regex.", "file": "FLLD-DM-v3.md", "line": 29, "excerpt": "shall be algorithmically inferred from legacy free-text clinical notes", "author": "David Vance", "date": "14-Jan-2026", "status": "APPROVED", "workstream": "Data Migration" },
+    { "id": "DM-04-R05", "statement": "Unparseable severity defaults to Unknown and stays active in the panel.", "file": "FLLD-DM-v3.md", "line": 32, "excerpt": "the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible", "author": "David Vance", "date": "14-Jan-2026", "status": "APPROVED", "workstream": "Data Migration" },
+    { "id": "CLIN-11-R01", "statement": "The allergy panel is empty at go-live for all migrated patients.", "file": "FLLD-CLIN-v2.md", "line": 16, "excerpt": "shall be unpopulated and empty at go-live for all migrated patients", "author": "Dr Fiona Gallagher", "date": "19-Feb-2026", "status": "APPROVED", "workstream": "Clinical Design" },
+    { "id": "CLIN-11-R02", "statement": "Legacy allergy data must never populate a clinical field.", "file": "FLLD-CLIN-v2.md", "line": 19, "excerpt": "Legacy allergy data must never populate a clinical field", "author": "Dr Fiona Gallagher", "date": "19-Feb-2026", "status": "APPROVED", "workstream": "Clinical Design" },
+    { "id": "CLIN-11-R03", "statement": "Allergies are captured from the patient at the first appointment after go-live.", "file": "FLLD-CLIN-v2.md", "line": 22, "excerpt": "during the patient's first physical or virtual clinical appointment after go-live", "author": "Dr Fiona Gallagher", "date": "19-Feb-2026", "status": "APPROVED", "workstream": "Clinical Design" },
+    { "id": "CLIN-11-R04", "statement": "ePMA hard-stop blocks non-emergency orders until reconciliation; emergency orders exempt.", "file": "FLLD-CLIN-v2.md", "line": 25, "excerpt": "Emergency orders are exempt from the hard-stop.", "author": "Dr Fiona Gallagher", "date": "19-Feb-2026", "status": "APPROVED", "workstream": "Clinical Design" },
+    { "id": "CLIN-11-R05", "statement": "Severity is elicited from the patient, never inferred from free text.", "file": "FLLD-CLIN-v2.md", "line": 28, "excerpt": "never inferred or derived from automated algorithms or unverified historical free-text notes", "author": "Dr Fiona Gallagher", "date": "19-Feb-2026", "status": "APPROVED", "workstream": "Clinical Design" },
+    { "id": "MAP-ROW-04", "statement": "ALLERGEN_CODE maps to SNOMED; unmapped -> 716186003.", "file": "field-mapping.csv", "line": 5, "excerpt": "SNOMED CT NHS UK subset map; unmapped -> 716186003", "author": "A. Pendelton", "date": "14-Jan-2026", "status": "DRAFT", "workstream": "Data Migration" },
+    { "id": "MAP-ROW-06", "statement": "SEVERITY_CODE is not migrated; free-text derivation cancelled.", "file": "field-mapping.csv", "line": 7, "excerpt": "Do not migrate - free text derivation cancelled by Pharmacy SME", "author": "M. Brody", "date": "05-Mar-2026", "status": "DRAFT", "workstream": "Data Migration" },
+    { "id": "MAP-ROW-10", "statement": "CLINICAL_COMMENTS truncated to 4000 characters.", "file": "field-mapping.csv", "line": 11, "excerpt": "Truncate 4000 chars; sanitise HTML", "author": "A. Pendelton", "date": "14-Jan-2026", "status": "DRAFT", "workstream": "Data Migration" },
+    { "id": "MAP-ROW-12", "statement": "WARD_LOCATION_CODE migrates via a Ward Master lookup that does not yet exist.", "file": "field-mapping.csv", "line": 13, "excerpt": "Direct lookup pending Ward Master ref", "author": "M. Brody", "date": "04-Mar-2026", "status": "DRAFT", "workstream": "Data Migration" },
+    { "id": "CHAT-01", "statement": "Pharmacy SME rejects free-text severity derivation as a prescribing risk.", "file": "teams-export.txt", "line": 2, "excerpt": "We can't derive severity from free text, it's a prescribing risk.", "author": "Marcus Brody (Pharmacy SME)", "date": "2026-03-03", "status": "VERBAL", "workstream": "Cross-Stream" },
+    { "id": "CHAT-02", "statement": "Clinical Safety Group ruled free-text severity inference cannot go live.", "file": "teams-export.txt", "line": 3, "excerpt": "misses anaphylaxis cases. It cannot go live.", "author": "Dr Eleanor Vance (Pharmacy Lead)", "date": "2026-03-03", "status": "VERBAL", "workstream": "Cross-Stream" },
+    { "id": "CHAT-03", "statement": "Dry-run extract produced a severity Unknown record for a documented anaphylaxis.", "file": "teams-export.txt", "line": 4, "excerpt": "the record came through as severity Unknown", "author": "Marcus Brody", "date": "2026-03-03", "status": "VERBAL", "workstream": "Cross-Stream" },
+    { "id": "CHAT-04", "statement": "The approved design still states DM-04-R04 and DM-04-R05 are active; no change request raised.", "file": "teams-export.txt", "line": 11, "excerpt": "The approved PDF still states DM-04-R04 and DM-04-R05 are active.", "author": "Arthur Pendelton", "date": "2026-03-03", "status": "UNRECORDED", "workstream": "Cross-Stream" },
+    { "id": "CHAT-05", "statement": "No approved design covers ward-level location translation.", "file": "teams-export.txt", "line": 9, "excerpt": "there is no approved design document for ward-level location translation", "author": "Marcus Brody", "date": "2026-03-03", "status": "UNRECORDED", "workstream": "Cross-Stream" },
+    { "id": "CHAT-06", "statement": "Safeguarding note held in free text will be truncated by Row 10; ownership unresolved.", "file": "teams-export.txt", "line": 13, "excerpt": "If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?", "author": "Dr Eleanor Vance", "date": "2026-03-03", "status": "UNRECORDED", "workstream": "Cross-Stream" }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "type": "CONTRADICTION",
+      "title": "Allergy severity defaults to Unknown and stays active at go-live; the clinical design says the panel is empty and severity comes from the patient",
+      "why_incompatible": "FLLD-DM-04 (approved 14 January) migrates every legacy allergy into the active clinical panel, and where severity cannot be parsed sets it to \"Unknown\" while keeping the record active and visible. FLLD-CLIN-11 (approved 19 February) requires the same panel to be empty at go-live, forbids legacy data from populating a clinical field, and requires severity to be elicited from the patient at the first appointment. Both cannot be built.",
+      "clinical_consequence": "A patient with a documented anaphylaxis presents after go-live with the allergy shown as severity Unknown. The hard-stop that would force reconciliation exempts emergency orders, so an emergency prescription can be written against an Unknown severity record. The remedy the clinical design relies on, capture at first appointment, is the appointment the patient is already in.",
+      "sources": [
+        { "file": "FLLD-DM-v3.md", "line": 32, "excerpt": "the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible" },
+        { "file": "FLLD-DM-v3.md", "line": 26, "excerpt": "All migrated allergy records shall be rendered immediately visible and active" },
+        { "file": "FLLD-CLIN-v2.md", "line": 16, "excerpt": "shall be unpopulated and empty at go-live for all migrated patients" },
+        { "file": "FLLD-CLIN-v2.md", "line": 28, "excerpt": "never inferred or derived from automated algorithms or unverified historical free-text notes" },
+        { "file": "FLLD-CLIN-v2.md", "line": 25, "excerpt": "Emergency orders are exempt from the hard-stop." },
+        { "file": "teams-export.txt", "line": 4, "excerpt": "the record came through as severity Unknown" }
+      ]
+    },
+    {
+      "id": "F-02",
+      "type": "SILENT_DEFAULT",
+      "title": "Unmapped legacy allergens are coded as No known allergy",
+      "why_incompatible": "The migration design and the field mapping both send any allergen that fails SNOMED matching to concept 716186003, No known allergy, with the original text demoted to a secondary note. The clinical design prohibits legacy data populating a clinical field at all. A coding fallback that asserts the absence of an allergy is the opposite of a blank.",
+      "clinical_consequence": "A real allergy whose legacy label did not match the subset is presented to prescribers as a positive statement that the patient has no known allergy. Drug-allergy interaction alerts cannot fire on a No known allergy record.",
+      "sources": [
+        { "file": "FLLD-DM-v3.md", "line": 23, "excerpt": "Unmapped items shall be assigned SNOMED code 716186003 (No known allergy)" },
+        { "file": "field-mapping.csv", "line": 5, "excerpt": "SNOMED CT NHS UK subset map; unmapped -> 716186003" },
+        { "file": "FLLD-CLIN-v2.md", "line": 19, "excerpt": "Legacy allergy data must never populate a clinical field" }
+      ]
+    },
+    {
+      "id": "F-03",
+      "type": "VERBAL_OVERRIDE",
+      "title": "Severity derivation was cancelled in a Teams channel and the mapping sheet; the approved design still mandates it",
+      "why_incompatible": "On 3 March the Pharmacy SME and Pharmacy Lead rejected regex severity derivation, Row 6 of the field mapping was set to Migrate=N, the joint walkthrough was cancelled without minutes, and nobody raised a change request. FLLD-DM-04 v3.0 remains the approved artefact and still contains DM-04-R04 and DM-04-R05 as active requirements.",
+      "clinical_consequence": "An ETL developer working from the approved design builds severity derivation and the Unknown default; a mapping technician working from the CSV suppresses the field. Which one ships depends on who reads which document. The authoritative record of the decision is a chat message.",
+      "sources": [
+        { "file": "teams-export.txt", "line": 2, "excerpt": "We can't derive severity from free text, it's a prescribing risk." },
+        { "file": "teams-export.txt", "line": 6, "excerpt": "I will update Row 6 on field-mapping.csv right now to set Migrate=N." },
+        { "file": "field-mapping.csv", "line": 7, "excerpt": "Do not migrate - free text derivation cancelled by Pharmacy SME" },
+        { "file": "FLLD-DM-v3.md", "line": 29, "excerpt": "shall be algorithmically inferred from legacy free-text clinical notes" },
+        { "file": "teams-export.txt", "line": 7, "excerpt": "so we will skip formal minuting for now" },
+        { "file": "teams-export.txt", "line": 11, "excerpt": "The approved PDF still states DM-04-R04 and DM-04-R05 are active." }
+      ]
+    },
+    {
+      "id": "F-04",
+      "type": "ORPHAN_DEPENDENCY",
+      "title": "Ward location codes migrate through a lookup that no approved design defines",
+      "why_incompatible": "Row 12 of the field mapping is set to migrate WARD_LOCATION_CODE via a Ward Master reference. The channel confirms no design document exists for ward-level translation and the item was parked pending the PAS team.",
+      "clinical_consequence": "Inpatient allergy records whose legacy ward code has no translation either reject at load or attach to the wrong care setting, and the exception queue has 72 hours to clear them.",
+      "sources": [
+        { "file": "field-mapping.csv", "line": 13, "excerpt": "Direct lookup pending Ward Master ref" },
+        { "file": "teams-export.txt", "line": 9, "excerpt": "there is no approved design document for ward-level location translation" },
+        { "file": "teams-export.txt", "line": 10, "excerpt": "We have no design covering ward code transformations yet." }
+      ]
+    },
+    {
+      "id": "F-05",
+      "type": "UNOWNED_DECISION",
+      "title": "A paediatric safeguarding note sits at the end of a free-text field that Row 10 truncates, and nobody in the programme owns it",
+      "why_incompatible": "Row 10 truncates CLINICAL_COMMENTS at 4000 characters. The Pharmacy Lead identified that a safeguarding flag is held only in that free text, at the end, and asked who owns it. The migration architect declined ownership and redirected the question out of the channel. No document records a decision.",
+      "clinical_consequence": "A child's safeguarding flag is silently removed by the migration. The paediatric verification flag in DM-04-R08 does not cover it because the flag is not a coded allergy field.",
+      "sources": [
+        { "file": "field-mapping.csv", "line": 11, "excerpt": "Truncate 4000 chars; sanitise HTML" },
+        { "file": "teams-export.txt", "line": 13, "excerpt": "If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?" },
+        { "file": "teams-export.txt", "line": 14, "excerpt": "Not us, that's a PAS safeguarding question." }
+      ]
+    }
+  ],
+  "dropped": []
+}

@@ -1,0 +1,989 @@
+{
+  "generated_at": "2026-09-03T17:41:29.418Z",
+  "corpus_dir": "corpus",
+  "files": [
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "lines": 36,
+      "sha256": "25d7f342113e10c6fee162f056cb0459fcf56a6b49d7516d9e463e356c771dbf",
+      "kind": "design"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "lines": 49,
+      "sha256": "76c43cd9f01161ec8ca1ab4593cf42b19dfa1935b35d90bf27728703b470dd3c",
+      "kind": "design"
+    },
+    {
+      "file": "field-mapping.csv",
+      "lines": 13,
+      "sha256": "40cafc9d2f90dcebc68c7ad2e5a9021885800f9f70a2500a847a07471ffc8543",
+      "kind": "csv"
+    },
+    {
+      "file": "teams-export.txt",
+      "lines": 15,
+      "sha256": "695ffcd9ec42b53a1e2434133f43af462cbbede8083db877c7ec610fc540e06f",
+      "kind": "chat"
+    }
+  ],
+  "requirement_ids": [
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 15,
+      "id": "CLIN-11-R01",
+      "heading": "Unpopulated Allergy Panel at Go-Live"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 18,
+      "id": "CLIN-11-R02",
+      "heading": "Prohibition of Unverified Legacy Data Ingestion"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 21,
+      "id": "CLIN-11-R03",
+      "heading": "Point-of-Care Allergy Reconciliation"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 24,
+      "id": "CLIN-11-R04",
+      "heading": "Prescribing Hard-Stop"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 27,
+      "id": "CLIN-11-R05",
+      "heading": "Direct Patient Elicitation of Severity"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 30,
+      "id": "CLIN-11-R06",
+      "heading": "Clinical Decision Support Rule Alignment"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 19,
+      "id": "DM-04-R01",
+      "heading": "Historical Allergy Record Migration"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 22,
+      "id": "DM-04-R02",
+      "heading": "SNOMED CT Terminology Coding"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 25,
+      "id": "DM-04-R03",
+      "heading": "Immediate Visibility in Active Clinical Panel"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 28,
+      "id": "DM-04-R04",
+      "heading": "Algorithmic Severity Derivation from Legacy Notes"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 31,
+      "id": "DM-04-R05",
+      "heading": "Severity Default on Parse Failure"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 34,
+      "id": "DM-04-R06",
+      "heading": "Audit Logging and Clinician Attestation"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 37,
+      "id": "DM-04-R07",
+      "heading": "Duplicate Resolution Mechanism"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 40,
+      "id": "DM-04-R08",
+      "heading": "Paediatric Verification Flag"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 43,
+      "id": "DM-04-R09",
+      "heading": "Transformation Failure Handling"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 2,
+      "id": "DM-04-R04"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 11,
+      "id": "DM-04-R04"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 11,
+      "id": "DM-04-R05"
+    }
+  ],
+  "document_refs": [
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 2,
+      "ref": "FLLD-CLIN-11"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 2,
+      "ref": "FLLD-DM-04"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 8,
+      "ref": "FLLD-DM-04"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 11,
+      "ref": "FLLD-DM-04"
+    }
+  ],
+  "approvals": [
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 34,
+      "name": "Dr Fiona Gallagher",
+      "role": "Consultant Anaesthetist and Clinical Safety Officer",
+      "date": "19-Feb-2026"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 35,
+      "name": "Prof Alistair Finch",
+      "role": "Medical Director and Chair, CSG",
+      "date": "19-Feb-2026"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 36,
+      "name": "Dr Eleanor Vance",
+      "role": "Clinical Lead Pharmacy & Therapeutics",
+      "date": "19-Feb-2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 47,
+      "name": "David Vance",
+      "role": "Lead Migration Architect",
+      "date": "14-Jan-2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 48,
+      "name": "Sarah Jenkins",
+      "role": "Migration Workstream Lead",
+      "date": "14-Jan-2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 49,
+      "name": "Arthur Pendelton",
+      "role": "Solution Assurance SME",
+      "date": "14-Jan-2026"
+    }
+  ],
+  "header_fields": [
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 2,
+      "key": "Document Reference",
+      "value": "FLLD-CLIN-11 (Functional Low-Level Design)"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 3,
+      "key": "Workstream",
+      "value": "Clinical Design & Patient Safety"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 4,
+      "key": "Author",
+      "value": "Dr Fiona Gallagher (Consultant Anaesthetist; Clinical Safety Officer)"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 5,
+      "key": "Approved Date",
+      "value": "19 February 2026"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 6,
+      "key": "Version",
+      "value": "2.0 (Final Approved)"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 7,
+      "key": "Target Platform",
+      "value": "Aurora EPR Release 4.2"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 8,
+      "key": "Clinical Safety Authority",
+      "value": "Meridian Health CSG (Clinical Safety Group)"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 2,
+      "key": "Document Reference",
+      "value": "FLLD-DM-04 (Functional Low-Level Design)"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 3,
+      "key": "Workstream",
+      "value": "Patient Data Migration & PAS Cutover"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 4,
+      "key": "Author",
+      "value": "David Vance (Lead Migration Architect)"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 5,
+      "key": "Approved Date",
+      "value": "14 January 2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 6,
+      "key": "Version",
+      "value": "3.0 (Final Approved)"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 7,
+      "key": "Target Platform",
+      "value": "Aurora EPR Release 4.2"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 8,
+      "key": "Source Platform",
+      "value": "Legacy CareTrak PAS v11.3"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 9,
+      "key": "Commercial Note",
+      "value": "CareTrak decommission deadline 30 June 2026; supplier extension fee £412,000 per quarter thereafter (contract CT-2019-SVC-114, schedule 4)."
+    }
+  ],
+  "dates": [
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 5,
+      "value": "19 February 2026"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 34,
+      "value": "19-Feb-2026"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 35,
+      "value": "19-Feb-2026"
+    },
+    {
+      "file": "FLLD-CLIN-v2.md",
+      "line": 36,
+      "value": "19-Feb-2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 5,
+      "value": "14 January 2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 9,
+      "value": "30 June 2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 47,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 48,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 49,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 2,
+      "value": "12-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 3,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 4,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 5,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 6,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 7,
+      "value": "05-Mar-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 8,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 9,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 10,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 11,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 12,
+      "value": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 13,
+      "value": "04-Mar-2026"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 1,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 2,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 3,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 4,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 4,
+      "value": "12/08/1987"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 5,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 6,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 7,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 8,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 9,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 10,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 11,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 12,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 13,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 14,
+      "value": "2026-03-03"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 15,
+      "value": "2026-03-03"
+    }
+  ],
+  "field_names": [
+    {
+      "file": "field-mapping.csv",
+      "line": 2,
+      "name": "PAT_ALLERGY_ID"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 2,
+      "name": "AUR_ALLERGY_ID"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 3,
+      "name": "PAT_NHS_NUMBER"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 3,
+      "name": "AUR_PATIENT_NHS_NO"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 4,
+      "name": "ALLERGY_DESC"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 4,
+      "name": "AUR_ALLERGEN_NAME"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 5,
+      "name": "ALLERGEN_CODE"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 5,
+      "name": "AUR_SNOMED_CONCEPT_ID"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 6,
+      "name": "REACTION_TYPE"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 6,
+      "name": "AUR_REACTION_CATEGORY"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 7,
+      "name": "SEVERITY_CODE"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 7,
+      "name": "AUR_SEVERITY_LEVEL"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 8,
+      "name": "DATE_RECORDED"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 8,
+      "name": "AUR_RECORDED_DATETIME"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 9,
+      "name": "RECORDING_CLINICIAN_ID"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 9,
+      "name": "AUR_ORIGINATING_STAFF_REF"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 10,
+      "name": "STATUS_FLAG"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 10,
+      "name": "AUR_ACTIVE_STATUS"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 11,
+      "name": "CLINICAL_COMMENTS"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 11,
+      "name": "AUR_HISTORICAL_NOTES"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 12,
+      "name": "VERIFICATION_STATUS"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 12,
+      "name": "AUR_CONFIRMATION_STATE"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 13,
+      "name": "WARD_LOCATION_CODE"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 13,
+      "name": "AUR_CARE_SETTING_ID"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 13,
+      "name": "CLINICAL_COMMENTS"
+    }
+  ],
+  "csv_rows": [
+    {
+      "file": "field-mapping.csv",
+      "line": 2,
+      "Row": "1",
+      "Legacy_Field": "PAT_ALLERGY_ID",
+      "Aurora_Field": "AUR_ALLERGY_ID",
+      "Migrate": "Y",
+      "Transform": "Direct 1:1 GUID generation",
+      "Owner": "D. Vance",
+      "Last_Changed": "12-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 3,
+      "Row": "2",
+      "Legacy_Field": "PAT_NHS_NUMBER",
+      "Aurora_Field": "AUR_PATIENT_NHS_NO",
+      "Migrate": "Y",
+      "Transform": "Format ISO-13606 validation",
+      "Owner": "S. Jenkins",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 4,
+      "Row": "3",
+      "Legacy_Field": "ALLERGY_DESC",
+      "Aurora_Field": "AUR_ALLERGEN_NAME",
+      "Migrate": "Y",
+      "Transform": "Cleanse whitespace trim",
+      "Owner": "D. Vance",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 5,
+      "Row": "4",
+      "Legacy_Field": "ALLERGEN_CODE",
+      "Aurora_Field": "AUR_SNOMED_CONCEPT_ID",
+      "Migrate": "Y",
+      "Transform": "SNOMED CT NHS UK subset map; unmapped -> 716186003",
+      "Owner": "A. Pendelton",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 6,
+      "Row": "5",
+      "Legacy_Field": "REACTION_TYPE",
+      "Aurora_Field": "AUR_REACTION_CATEGORY",
+      "Migrate": "Y",
+      "Transform": "Map Enum (Allergy|Intolerance|Adverse)",
+      "Owner": "D. Vance",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 7,
+      "Row": "6",
+      "Legacy_Field": "SEVERITY_CODE",
+      "Aurora_Field": "AUR_SEVERITY_LEVEL",
+      "Migrate": "N",
+      "Transform": "Do not migrate - free text derivation cancelled by Pharmacy SME",
+      "Owner": "M. Brody",
+      "Last_Changed": "05-Mar-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 8,
+      "Row": "7",
+      "Legacy_Field": "DATE_RECORDED",
+      "Aurora_Field": "AUR_RECORDED_DATETIME",
+      "Migrate": "Y",
+      "Transform": "Convert DD/MM/YYYY to UTC ISO-8601",
+      "Owner": "S. Jenkins",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 9,
+      "Row": "8",
+      "Legacy_Field": "RECORDING_CLINICIAN_ID",
+      "Aurora_Field": "AUR_ORIGINATING_STAFF_REF",
+      "Migrate": "Y",
+      "Transform": "Lookup GMC/NMC master table",
+      "Owner": "D. Vance",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 10,
+      "Row": "9",
+      "Legacy_Field": "STATUS_FLAG",
+      "Aurora_Field": "AUR_ACTIVE_STATUS",
+      "Migrate": "Y",
+      "Transform": "Map (A->Active; I->Resolved)",
+      "Owner": "D. Vance",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 11,
+      "Row": "10",
+      "Legacy_Field": "CLINICAL_COMMENTS",
+      "Aurora_Field": "AUR_HISTORICAL_NOTES",
+      "Migrate": "Y",
+      "Transform": "Truncate 4000 chars; sanitise HTML",
+      "Owner": "A. Pendelton",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 12,
+      "Row": "11",
+      "Legacy_Field": "VERIFICATION_STATUS",
+      "Aurora_Field": "AUR_CONFIRMATION_STATE",
+      "Migrate": "Y",
+      "Transform": "Default to Unconfirmed_Legacy",
+      "Owner": "D. Vance",
+      "Last_Changed": "14-Jan-2026"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 13,
+      "Row": "12",
+      "Legacy_Field": "WARD_LOCATION_CODE",
+      "Aurora_Field": "AUR_CARE_SETTING_ID",
+      "Migrate": "Y",
+      "Transform": "Direct lookup pending Ward Master ref",
+      "Owner": "M. Brody",
+      "Last_Changed": "04-Mar-2026"
+    }
+  ],
+  "chat_messages": [
+    {
+      "file": "teams-export.txt",
+      "line": 1,
+      "timestamp": "2026-03-03 09:14:22",
+      "speaker": "David Vance"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 2,
+      "timestamp": "2026-03-03 09:21:05",
+      "speaker": "Marcus Brody (Pharmacy SME)"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 3,
+      "timestamp": "2026-03-03 09:23:40",
+      "speaker": "Dr Eleanor Vance (Pharmacy Lead)"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 4,
+      "timestamp": "2026-03-03 09:26:02",
+      "speaker": "Marcus Brody"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 5,
+      "timestamp": "2026-03-03 09:28:15",
+      "speaker": "David Vance"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 6,
+      "timestamp": "2026-03-03 09:31:00",
+      "speaker": "Marcus Brody"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 7,
+      "timestamp": "2026-03-03 09:34:12",
+      "speaker": "David Vance"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 8,
+      "timestamp": "2026-03-03 09:35:48",
+      "speaker": "Sarah Jenkins"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 9,
+      "timestamp": "2026-03-03 09:38:10",
+      "speaker": "Marcus Brody"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 10,
+      "timestamp": "2026-03-03 09:41:04",
+      "speaker": "David Vance"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 11,
+      "timestamp": "2026-03-03 09:45:30",
+      "speaker": "Arthur Pendelton"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 12,
+      "timestamp": "2026-03-03 09:47:11",
+      "speaker": "Sarah Jenkins"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 13,
+      "timestamp": "2026-03-03 10:02:37",
+      "speaker": "Dr Eleanor Vance"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 14,
+      "timestamp": "2026-03-03 10:05:49",
+      "speaker": "David Vance"
+    },
+    {
+      "file": "teams-export.txt",
+      "line": 15,
+      "timestamp": "2026-03-03 10:07:20",
+      "speaker": "Sarah Jenkins"
+    }
+  ],
+  "snomed_codes": [
+    {
+      "file": "FLLD-DM-v3.md",
+      "line": 23,
+      "code": "716186003"
+    },
+    {
+      "file": "field-mapping.csv",
+      "line": 5,
+      "code": "716186003"
+    }
+  ],
+  "identifiable_data": [
+    {
+      "kind": "contract_value",
+      "file": "FLLD-DM-v3.md",
+      "line": 9
+    },
+    {
+      "kind": "nhs_number",
+      "file": "teams-export.txt",
+      "line": 4
+    },
+    {
+      "kind": "date_of_birth",
+      "file": "teams-export.txt",
+      "line": 4
+    },
+    {
+      "kind": "nhs_number",
+      "file": "teams-export.txt",
+      "line": 13
+    },
+    {
+      "kind": "safeguarding",
+      "file": "teams-export.txt",
+      "line": 13
+    },
+    {
+      "kind": "safeguarding",
+      "file": "teams-export.txt",
+      "line": 14
+    },
+    {
+      "kind": "contract_value",
+      "file": "teams-export.txt",
+      "line": 15
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 1
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 2
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 3
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 4
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 5
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 6
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 7
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 8
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 9
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 10
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 11
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 12
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 13
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 14
+    },
+    {
+      "kind": "named_clinician",
+      "file": "teams-export.txt",
+      "line": 15
+    },
+    {
+      "kind": "named_clinician",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 34
+    },
+    {
+      "kind": "named_clinician",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 35
+    },
+    {
+      "kind": "named_clinician",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 36
+    },
+    {
+      "kind": "named_clinician",
+      "file": "FLLD-DM-v3.md",
+      "line": 47
+    },
+    {
+      "kind": "named_clinician",
+      "file": "FLLD-DM-v3.md",
+      "line": 48
+    },
+    {
+      "kind": "named_clinician",
+      "file": "FLLD-DM-v3.md",
+      "line": 49
+    }
+  ]
+}

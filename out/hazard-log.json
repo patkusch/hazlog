@@ -1,0 +1,141 @@
+{
+  "run": {
+    "engine": "FIXTURE",
+    "note": "Seeded demo fixture. Severity and likelihood are proposals. Nothing here is a confirmed hazard log entry until a Clinical Safety Officer signs it (DCB0160 3.3.2).",
+    "model": null,
+    "timestamp": "2026-09-03T18:00:00Z",
+    "standard": { "id": "DCB0160", "amendment": "Amd 25/2018", "version": "3.2", "published": "7 June 2018", "legal_basis": "Section 250, Health and Social Care Act 2012" }
+  },
+  "entries": [
+    {
+      "hazard_id": "HZ-001",
+      "finding_id": "F-01",
+      "hazard_name": "Severe allergy presented as severity Unknown in an active record at go-live",
+      "hazard_description": "Legacy allergy records whose severity cannot be parsed are migrated with severity Unknown and remain active and visible, while the clinical design assumes the panel is empty and severity is elicited from the patient at first appointment. Two approved designs, one panel.",
+      "causes": [
+        "FLLD-DM-04 DM-04-R05 defaults unparseable severity to Unknown and keeps the record active",
+        "FLLD-DM-04 DM-04-R03 renders every migrated record visible at go-live",
+        "FLLD-CLIN-11 CLIN-11-R01/R05 assume an empty panel and patient-elicited severity",
+        "Regex derivation demonstrably misses anaphylaxis across a line break (dry-run extract)"
+      ],
+      "clinical_effect": "A prescriber sees an active allergy with severity Unknown for a patient with a documented anaphylaxis. Emergency orders are exempt from the reconciliation hard-stop, so an emergency drug order can be placed against the Unknown record. The reconciliation appointment that the clinical design relies on is the encounter in progress.",
+      "existing_controls": [
+        "CLIN-11-R04 ePMA hard-stop on non-emergency orders (does not cover emergency orders)",
+        "DM-04-R08 paediatric verification flag (under-16 only)"
+      ],
+      "proposed_severity": "Major",
+      "severity_rationale": "Death of a single patient from an anaphylactic reaction to a drug given against an Unknown severity record is a credible worst case.",
+      "proposed_likelihood": "High",
+      "likelihood_rationale": "1.4 million records, regex derivation shown to fail on a real extract, and the failure mode produces an active record rather than an exception.",
+      "proposed_controls": [
+        "Decide which design governs the panel at go-live and withdraw the other (CSG decision, minuted)",
+        "If legacy records are migrated, hold them in a quarantined, non-prescribing state rather than active with Unknown severity",
+        "Remove the emergency exemption or surface an explicit unverified-allergy banner on emergency orders"
+      ],
+      "proposed_owner_role": "Clinical Safety Officer (Dr Fiona Gallagher) with Lead Migration Architect",
+      "evidence": [
+        { "file": "FLLD-DM-v3.md", "line": 32, "excerpt": "the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible" },
+        { "file": "FLLD-CLIN-v2.md", "line": 16, "excerpt": "shall be unpopulated and empty at go-live for all migrated patients" },
+        { "file": "FLLD-CLIN-v2.md", "line": 28, "excerpt": "never inferred or derived from automated algorithms or unverified historical free-text notes" },
+        { "file": "FLLD-CLIN-v2.md", "line": 25, "excerpt": "Emergency orders are exempt from the hard-stop." },
+        { "file": "teams-export.txt", "line": 4, "excerpt": "the record came through as severity Unknown" }
+      ],
+      "standard_refs": ["DCB0160 4.3.1 identify hazards in normal and fault conditions", "DCB0160 4.4.1 estimate severity, likelihood and clinical risk", "DCB0160 3.3.2 CSO approves each version of the Hazard Log"]
+    },
+    {
+      "hazard_id": "HZ-002",
+      "finding_id": "F-02",
+      "hazard_name": "Unmapped legacy allergen coded as No known allergy",
+      "hazard_description": "Any legacy allergen that fails SNOMED subset matching is assigned concept 716186003, No known allergy, with the original text demoted to a secondary note. The record asserts the absence of an allergy the patient has.",
+      "causes": [
+        "FLLD-DM-04 DM-04-R02 fallback code for unmapped items",
+        "field-mapping.csv Row 4 implements the same fallback",
+        "FLLD-CLIN-11 CLIN-11-R02 prohibits legacy data populating a clinical field; the fallback is not treated as legacy data"
+      ],
+      "clinical_effect": "Drug-allergy interaction alerts cannot fire on a No known allergy record. A prescriber is positively told the patient has no allergy.",
+      "existing_controls": ["Legacy text retained in secondary notes (not surfaced to the prescribing workflow)"],
+      "proposed_severity": "Catastrophic",
+      "severity_rationale": "The fallback applies to every unmatched record in a 1.4 million record migration; more than one patient could be affected.",
+      "proposed_likelihood": "Medium",
+      "likelihood_rationale": "Best-effort matching of free-text substance labels will leave a material residue unmatched; the rate is unmeasured.",
+      "proposed_controls": [
+        "Replace the 716186003 fallback with an unresolved-allergen placeholder that blocks DAI and prompts reconciliation",
+        "Report the unmatched rate from the dry run before cutover"
+      ],
+      "proposed_owner_role": "Clinical Safety Officer with Solution Assurance SME (Arthur Pendelton)",
+      "evidence": [
+        { "file": "FLLD-DM-v3.md", "line": 23, "excerpt": "Unmapped items shall be assigned SNOMED code 716186003 (No known allergy)" },
+        { "file": "field-mapping.csv", "line": 5, "excerpt": "SNOMED CT NHS UK subset map; unmapped -> 716186003" },
+        { "file": "FLLD-CLIN-v2.md", "line": 19, "excerpt": "Legacy allergy data must never populate a clinical field" }
+      ],
+      "standard_refs": ["DCB0160 4.3.1", "DCB0160 4.4.1", "DCB0160 3.3.2"]
+    },
+    {
+      "hazard_id": "HZ-003",
+      "finding_id": "F-03",
+      "hazard_name": "Approved design and build artefacts disagree on severity derivation; the decision exists only in chat",
+      "hazard_description": "Severity derivation was cancelled verbally and in the mapping sheet on 3 March. The approved FLLD-DM-04 v3.0 still mandates it. The walkthrough that would have minuted the decision was cancelled and no change request was raised.",
+      "causes": [
+        "Decision taken in a Teams channel, not propagated to the approved artefact",
+        "Joint walkthrough cancelled; formal minuting skipped",
+        "No change request raised against FLLD-DM-04"
+      ],
+      "clinical_effect": "Which behaviour ships is determined by which document the developer read. Either outcome is uncontrolled: derivation reintroduces HZ-001, suppression without a design change leaves Unknown defaults undefined.",
+      "existing_controls": ["None recorded"],
+      "proposed_severity": "Considerable",
+      "severity_rationale": "Consequence is an uncontrolled build outcome feeding HZ-001; direct harm depends on which branch ships.",
+      "proposed_likelihood": "High",
+      "likelihood_rationale": "Dry run is scheduled against the current artefacts and the documentation update is explicitly deferred.",
+      "proposed_controls": ["Raise and approve a change request against FLLD-DM-04 before the dry run", "Minute the 3 March decision in the Clinical Risk Management File (DCB0160 3.1.4)"],
+      "proposed_owner_role": "Migration Workstream Lead (Sarah Jenkins)",
+      "evidence": [
+        { "file": "teams-export.txt", "line": 2, "excerpt": "We can't derive severity from free text, it's a prescribing risk." },
+        { "file": "field-mapping.csv", "line": 7, "excerpt": "Do not migrate - free text derivation cancelled by Pharmacy SME" },
+        { "file": "FLLD-DM-v3.md", "line": 29, "excerpt": "shall be algorithmically inferred from legacy free-text clinical notes" },
+        { "file": "teams-export.txt", "line": 11, "excerpt": "The approved PDF still states DM-04-R04 and DM-04-R05 are active." }
+      ],
+      "standard_refs": ["DCB0160 3.1.4 decisions influencing clinical risk management recorded in the CRM File", "DCB0160 3.3.1"]
+    },
+    {
+      "hazard_id": "HZ-004",
+      "finding_id": "F-04",
+      "hazard_name": "Ward location codes migrate through an undefined lookup",
+      "hazard_description": "Row 12 migrates WARD_LOCATION_CODE via a Ward Master reference that no approved design defines. The gap is acknowledged in the channel and parked.",
+      "causes": ["No design artefact for ward-level location translation", "Mapping row left at Migrate=Y pending a response"],
+      "clinical_effect": "Inpatient allergy records reject at load or attach to the wrong care setting; misattributed care setting can misdirect ward-level alerts.",
+      "existing_controls": ["DM-04-R09 staging exception queue, 72-hour manual resolution"],
+      "proposed_severity": "Significant",
+      "severity_rationale": "Mis-located records are recoverable through the exception queue; harm requires a second failure.",
+      "proposed_likelihood": "Medium",
+      "likelihood_rationale": "Legacy ward codes without a translation are certain to exist; the volume is unknown.",
+      "proposed_controls": ["Set Row 12 to Migrate=N until a translation design is approved, or produce the design"],
+      "proposed_owner_role": "Lead Migration Architect (David Vance)",
+      "evidence": [
+        { "file": "field-mapping.csv", "line": 13, "excerpt": "Direct lookup pending Ward Master ref" },
+        { "file": "teams-export.txt", "line": 9, "excerpt": "there is no approved design document for ward-level location translation" }
+      ],
+      "standard_refs": ["DCB0160 4.3.1"]
+    },
+    {
+      "hazard_id": "HZ-005",
+      "finding_id": "F-05",
+      "hazard_name": "Paediatric safeguarding note truncated by migration; ownership declined",
+      "hazard_description": "A safeguarding flag held only in free-text CLINICAL_COMMENTS sits beyond the 4000-character truncation in Row 10. The question of ownership was raised in the channel and redirected out of it. No decision is recorded anywhere.",
+      "causes": ["Row 10 truncation at 4000 characters", "Safeguarding information held in uncoded free text in the legacy system", "Ownership declined by the migration workstream and not picked up"],
+      "clinical_effect": "A child's safeguarding flag is silently lost at cutover. The paediatric verification flag (DM-04-R08) covers allergy records only.",
+      "existing_controls": ["None"],
+      "proposed_severity": "Major",
+      "severity_rationale": "Loss of a safeguarding flag for a child is a credible route to severe harm.",
+      "proposed_likelihood": "Low",
+      "likelihood_rationale": "Requires a note longer than 4000 characters with the flag at the end; at least one such record is known.",
+      "proposed_controls": ["Scan legacy CLINICAL_COMMENTS for safeguarding terms before truncation and route hits to a coded field or an exception", "Assign an owner outside the migration workstream and record it"],
+      "proposed_owner_role": "UNASSIGNED. Proposed: Trust Safeguarding Lead, via the Clinical Safety Officer",
+      "evidence": [
+        { "file": "field-mapping.csv", "line": 11, "excerpt": "Truncate 4000 chars; sanitise HTML" },
+        { "file": "teams-export.txt", "line": 13, "excerpt": "If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?" },
+        { "file": "teams-export.txt", "line": 14, "excerpt": "Not us, that's a PAS safeguarding question." }
+      ],
+      "standard_refs": ["DCB0160 4.3.1", "DCB0160 3.1.4"]
+    }
+  ]
+}

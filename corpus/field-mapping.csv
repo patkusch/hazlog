@@ -1,0 +1,13 @@
+Row,Legacy_Field,Aurora_Field,Migrate,Transform,Owner,Last_Changed
+1,PAT_ALLERGY_ID,AUR_ALLERGY_ID,Y,Direct 1:1 GUID generation,D. Vance,12-Jan-2026
+2,PAT_NHS_NUMBER,AUR_PATIENT_NHS_NO,Y,Format ISO-13606 validation,S. Jenkins,14-Jan-2026
+3,ALLERGY_DESC,AUR_ALLERGEN_NAME,Y,Cleanse whitespace trim,D. Vance,14-Jan-2026
+4,ALLERGEN_CODE,AUR_SNOMED_CONCEPT_ID,Y,SNOMED CT NHS UK subset map; unmapped -> 716186003,A. Pendelton,14-Jan-2026
+5,REACTION_TYPE,AUR_REACTION_CATEGORY,Y,Map Enum (Allergy|Intolerance|Adverse),D. Vance,14-Jan-2026
+6,SEVERITY_CODE,AUR_SEVERITY_LEVEL,N,Do not migrate - free text derivation cancelled by Pharmacy SME,M. Brody,05-Mar-2026
+7,DATE_RECORDED,AUR_RECORDED_DATETIME,Y,Convert DD/MM/YYYY to UTC ISO-8601,S. Jenkins,14-Jan-2026
+8,RECORDING_CLINICIAN_ID,AUR_ORIGINATING_STAFF_REF,Y,Lookup GMC/NMC master table,D. Vance,14-Jan-2026
+9,STATUS_FLAG,AUR_ACTIVE_STATUS,Y,Map (A->Active; I->Resolved),D. Vance,14-Jan-2026
+10,CLINICAL_COMMENTS,AUR_HISTORICAL_NOTES,Y,Truncate 4000 chars; sanitise HTML,A. Pendelton,14-Jan-2026
+11,VERIFICATION_STATUS,AUR_CONFIRMATION_STATE,Y,Default to Unconfirmed_Legacy,D. Vance,14-Jan-2026
+12,WARD_LOCATION_CODE,AUR_CARE_SETTING_ID,Y,Direct lookup pending Ward Master ref,M. Brody,04-Mar-2026

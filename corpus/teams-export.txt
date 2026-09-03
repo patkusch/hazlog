@@ -1,0 +1,15 @@
+[2026-03-03 09:14:22] David Vance: Morning all. We are finalising the DM-04 migration scripts for the dry run next Tuesday. Any pending questions on the allergy schema?
+[2026-03-03 09:21:05] Marcus Brody (Pharmacy SME): Hi David. I reviewed the severity transformation logic in DM-04-R04. We can't derive severity from free text, it's a prescribing risk.
+[2026-03-03 09:23:40] Dr Eleanor Vance (Pharmacy Lead): Marcus is completely right. Clinical Safety Group reviewed this last Thursday. Free-text severity inference generates false high-risk flags and misses anaphylaxis cases. It cannot go live.
+[2026-03-03 09:26:02] Marcus Brody: Concrete example from the dry-run extract: NHS number 943 476 5919, Priya Ramasubramanian, DOB 12/08/1987. Legacy note reads "penicillin - anaphylaxis 2011, ITU". The regex missed "anaphylaxis" because of the line break and the record came through as severity Unknown.
+[2026-03-03 09:28:15] David Vance: Understood Eleanor. If pharmacy rejects automated derivation, we need to drop Row 6 from the active ETL payload.
+[2026-03-03 09:31:00] Marcus Brody: Perfect. I will update Row 6 on field-mapping.csv right now to set Migrate=N.
+[2026-03-03 09:34:12] David Vance: Thanks Marcus. The scheduled joint walkthrough for Wednesday is cancelled due to the trust board meeting, so we will skip formal minuting for now.
+[2026-03-03 09:35:48] Sarah Jenkins: Note that FLLD-DM-04 needs a version bump to reflect the severity cancellation before the final sign-off audit.
+[2026-03-03 09:38:10] Marcus Brody: Also noticed Row 12 has a dependency on ward-code mapping from the legacy PAS, but there is no approved design document for ward-level location translation.
+[2026-03-03 09:41:04] David Vance: Good spot Marcus. We have no design covering ward code transformations yet. Let's park that until the PAS team responds.
+[2026-03-03 09:45:30] Arthur Pendelton: Has anyone logged a change request to update FLLD-DM-04 itself? The approved PDF still states DM-04-R04 and DM-04-R05 are active.
+[2026-03-03 09:47:11] Sarah Jenkins: Not yet, everyone is flat out on the cutover dry run. We'll pick up doc updates post-dry run.
+[2026-03-03 10:02:37] Dr Eleanor Vance: Separate point for the paediatric batch. The safeguarding flag on the CareTrak record for the Okafor child (NHS 621 903 4471) is held in CLINICAL_COMMENTS, not a coded field. If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?
+[2026-03-03 10:05:49] David Vance: Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint.
+[2026-03-03 10:07:20] Sarah Jenkins: Also a reminder that every week we slip past 30 June is £412k to CareTrak under schedule 4. The board has asked for the migration to complete on schedule.

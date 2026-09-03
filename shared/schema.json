@@ -1,0 +1,100 @@
+{
+  "$comment": "Constrained-decoding schemas handed to Ollama (format=<schema>). Each pass returns exactly one of these shapes or fails loudly.",
+  "pass1_requirements": {
+    "type": "object",
+    "required": ["requirements"],
+    "properties": {
+      "requirements": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "statement", "file", "line", "excerpt", "author", "date", "status", "workstream"],
+          "properties": {
+            "id": { "type": "string" },
+            "statement": { "type": "string" },
+            "file": { "type": "string" },
+            "line": { "type": "integer" },
+            "excerpt": { "type": "string" },
+            "author": { "type": "string" },
+            "date": { "type": "string" },
+            "status": { "type": "string", "enum": ["APPROVED", "DRAFT", "VERBAL", "UNRECORDED"] },
+            "workstream": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "pass2_findings": {
+    "type": "object",
+    "required": ["findings"],
+    "properties": {
+      "findings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "type", "title", "why_incompatible", "clinical_consequence", "sources"],
+          "properties": {
+            "id": { "type": "string" },
+            "type": { "type": "string", "enum": ["CONTRADICTION", "SILENT_DEFAULT", "VERBAL_OVERRIDE", "ORPHAN_DEPENDENCY", "UNOWNED_DECISION"] },
+            "title": { "type": "string" },
+            "why_incompatible": { "type": "string" },
+            "clinical_consequence": { "type": "string" },
+            "sources": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "required": ["file", "line", "excerpt"],
+                "properties": {
+                  "file": { "type": "string" },
+                  "line": { "type": "integer" },
+                  "excerpt": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "pass3_hazard_entries": {
+    "type": "object",
+    "required": ["entries"],
+    "properties": {
+      "entries": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["finding_id", "hazard_name", "hazard_description", "causes", "clinical_effect", "existing_controls", "proposed_severity", "proposed_likelihood", "proposed_controls", "proposed_owner_role", "evidence"],
+          "properties": {
+            "finding_id": { "type": "string" },
+            "hazard_name": { "type": "string" },
+            "hazard_description": { "type": "string" },
+            "causes": { "type": "array", "items": { "type": "string" } },
+            "clinical_effect": { "type": "string" },
+            "existing_controls": { "type": "array", "items": { "type": "string" } },
+            "proposed_severity": { "type": "string", "enum": ["Minor", "Significant", "Considerable", "Major", "Catastrophic"] },
+            "proposed_likelihood": { "type": "string", "enum": ["Very low", "Low", "Medium", "High", "Very high"] },
+            "severity_rationale": { "type": "string" },
+            "likelihood_rationale": { "type": "string" },
+            "proposed_controls": { "type": "array", "items": { "type": "string" } },
+            "proposed_owner_role": { "type": "string" },
+            "evidence": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "required": ["file", "line", "excerpt"],
+                "properties": {
+                  "file": { "type": "string" },
+                  "line": { "type": "integer" },
+                  "excerpt": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
