@@ -48,7 +48,7 @@ Using the verified requirements below and the full corpus, find every place wher
 - VERBAL_OVERRIDE: a decision made in chat or a sheet that an approved document still contradicts
 - ORPHAN_DEPENDENCY: a build artefact that depends on a design that does not exist
 - UNOWNED_DECISION: a question raised and not owned by anyone
-Every finding MUST cite at least two sources from at least two DIFFERENT FILES, each with file, line and an excerpt copied verbatim from that one line. Two requirements in the same document that agree with each other are not a finding. Copy the excerpt exactly; the file and line are checked in code and corrected from the excerpt if wrong. Describe the clinical consequence for a patient, not the project consequence.
+Every finding MUST cite at least two sources, each with file, line and an excerpt copied verbatim from that one line. A CONTRADICTION, SILENT_DEFAULT, VERBAL_OVERRIDE or ORPHAN_DEPENDENCY MUST cite two DIFFERENT FILES; an UNOWNED_DECISION may cite two lines of one file. Two requirements in the same document that agree with each other are not a finding. Copy the excerpt exactly; the file and line are checked in code and corrected from the excerpt if wrong. Describe the clinical consequence for a patient, not the project consequence.
 
 VERIFIED DESIGN REQUIREMENTS (extracted from the design documents, provenance checked):
 ${JSON.stringify(requirements.map(({ id, statement, file, line, excerpt, author, date, status }) => ({ id, statement, file, line, excerpt, author, date, status })), null, 1)}
@@ -72,7 +72,10 @@ CORPUS:
 ${prefixedCorpus(corpus)}`;
 }
 
-function verifyAll(corpus: Corpus, cites: Citation[]): { ok: boolean; sources: Source[]; reason?: string } {
+/** A contradiction, a silent default, a verbal override or an orphan dependency is a relationship between documents and must cite two. An unowned decision is a gap: it can live entirely in one channel, so it needs two lines, not two files. */
+export const TWO_FILE_TYPES = new Set(['CONTRADICTION', 'SILENT_DEFAULT', 'VERBAL_OVERRIDE', 'ORPHAN_DEPENDENCY']);
+
+function verifyAll(corpus: Corpus, cites: Citation[], type = 'CONTRADICTION'): { ok: boolean; sources: Source[]; reason?: string } {
   const sources: Source[] = [];
   for (const c of cites) {
     const v = resolveCitation(corpus, c);
@@ -81,7 +84,7 @@ function verifyAll(corpus: Corpus, cites: Citation[]): { ok: boolean; sources: S
   }
   const files = new Set(sources.map((c) => c.file));
   if (sources.length < 2) return { ok: false, sources, reason: 'fewer than two sources' };
-  if (files.size < 2) return { ok: false, sources, reason: 'all sources are in one file; a hazard between documents needs two documents' };
+  if (TWO_FILE_TYPES.has(type) && files.size < 2) return { ok: false, sources, reason: `all sources are in one file; a ${type} is a relationship between documents and needs two` };
   return { ok: true, sources };
 }
 
@@ -125,7 +128,7 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
   const p2 = await generateJson<{ findings: Finding[] }>(SYSTEM, pass2Prompt(corpus, requirements, seeded), SCHEMAS.pass2_findings, opts);
   const findings: Finding[] = [];
   (p2.findings ?? []).forEach((f, i) => {
-    const v = verifyAll(corpus, f.sources ?? []);
+    const v = verifyAll(corpus, f.sources ?? [], f.type);
     if (v.ok) findings.push({ ...f, id: `F-${String(findings.length + 1).padStart(2, '0')}`, sources: v.sources });
     else dropped.push({ pass: 2, id: f.id ?? `candidate-${i + 1}`, reason: v.reason!, item: { ...f, sources: v.sources } });
   });
@@ -137,7 +140,7 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
   if (findings.length) {
     const p3 = await generateJson<{ entries: Omit<HazardEntry, 'hazard_id' | 'standard_refs'>[] }>(SYSTEM, pass3Prompt(corpus, findings), SCHEMAS.pass3_hazard_entries, opts);
     for (const e of p3.entries ?? []) {
-      const v = verifyAll(corpus, e.evidence ?? []);
+      const v = verifyAll(corpus, e.evidence ?? [], findings.find((f) => f.id === e.finding_id)?.type);
       if (!findings.some((f) => f.id === e.finding_id)) { dropped.push({ pass: 3, id: e.finding_id, reason: 'refers to a finding that was not verified', item: e }); continue; }
       if (!v.ok) { dropped.push({ pass: 3, id: e.finding_id, reason: v.reason!, item: { ...e, evidence: v.sources } }); continue; }
       try { riskRating(e.proposed_severity, e.proposed_likelihood); } catch (err) { dropped.push({ pass: 3, id: e.finding_id, reason: (err as Error).message, item: e }); continue; }

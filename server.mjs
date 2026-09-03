@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT) || 4173;
 const TYPES = { '.html': 'text/html; charset=utf-8', '.json': 'application/json', '.md': 'text/plain; charset=utf-8', '.csv': 'text/plain; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
-const ALLOWED_DIRS = ['ui', 'out', 'corpus', 'shared'];
+const ALLOWED_DIRS = ['ui', 'out', 'corpus', 'shared', 'docs'];
 
 async function send(res, path) {
   try {

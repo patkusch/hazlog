@@ -21,8 +21,13 @@ The ten criteria from the build spec, and where each one is satisfied in this re
 - The `FILE:LINE` rule: no resolvable citation, no finding. The verifier is stricter than Aurora's: one-directional containment, blank lines and blank excerpts rejected, a minimum excerpt length, and every finding must span two files.
 - JSON-on-disk demo path.
 
+## Live runs
+
+Done, 3 September 2026, on the build machine with a standalone Ollama CLI on loopback: gemma3 (4B) and gemma3:12b. Outputs committed unedited under `docs/runs/` and selectable in the UI. The 12B run finds three of the five planted defects with nothing fabricated surviving. See README, *Live runs* and *Limits*.
+
 ## Not done
 
 - **Live Gemma run.** Ollama was not installed on the build machine. The local path is wired, schema-constrained and run end to end against a fake Ollama (`test/pipeline.test.ts`), which proves the drop rule but not model quality; it has not produced a run from a real model. `make run` will, and the engine badge will read `GEMMA_LOCAL`.
 - **Demo recording.** A screenshot (`docs/hazlog-hz001.png`); no video yet.
+- **Recall.** The local model finds 3 of 5 planted defects; the missed ones are the subtler mechanisms (a default value, a cancelled requirement). Not tuned beyond one prompt revision.
 - Live ingestion, diagrams, residual risk, a persistent hazard log.

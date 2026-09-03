@@ -64,6 +64,7 @@
   <h1>HAZLOG</h1>
   <span class="tag">Two approved documents. One patient. The hazard between them, cited to the line.</span>
   <div class="badges" id="badges"></div>
+  <select id="runSel" title="Which run to show" style="font:inherit;font-size:12px;background:#1c1c1c;color:#ddd;border:1px solid #444;border-radius:4px;padding:3px 6px"></select>
 </header>
 <div class="layout">
   <nav>
@@ -78,7 +79,13 @@
 <footer>HAZLOG proposes. The Clinical Safety Officer decides. The corpus on this page is synthetic, written for the demo. Nothing on this page has left this machine.</footer>
 <script>
 (async function () {
-  const [log, findings, index, matrix] = await Promise.all(['/out/hazard-log.json','/out/findings.json','/out/index.json','/shared/risk-matrix.json'].map(u => fetch(u).then(r => r.json())));
+  const runs = await fetch('/docs/runs/runs.json').then(r => r.json()).then(j => j.runs).catch(() => [{ id: 'fixture', label: 'Authored fixture (demo)', path: '/out', note: '' }]);
+  const runId = new URLSearchParams(location.search).get('run') || 'fixture';
+  const run = runs.find(r => r.id === runId) || runs[0];
+  const sel = document.getElementById('runSel');
+  sel.innerHTML = runs.map(r => `<option value="${r.id}" ${r.id === run.id ? 'selected' : ''}>${r.label}</option>`).join('');
+  sel.onchange = () => { location.search = '?run=' + encodeURIComponent(sel.value); };
+  const [log, findings, index, matrix] = await Promise.all([run.path + '/hazard-log.json', run.path + '/findings.json', '/out/index.json', '/shared/risk-matrix.json'].map(u => fetch(u).then(r => r.json())));
   const corpusCache = {};
   async function fileLines(f) { if (!corpusCache[f]) corpusCache[f] = (await fetch('/corpus/' + encodeURIComponent(f)).then(r => r.text())).replace(/\r\n/g,'\n').replace(/\n$/,'').split('\n'); return corpusCache[f]; }
   const sev = l => matrix.severity.find(s => s.level.toLowerCase() === l.toLowerCase());
@@ -94,7 +101,8 @@
     `<span class="badge ${log.run.engine === 'FIXTURE' ? 'fx' : 'ok'}">engine: ${esc(log.run.engine)}${log.run.model ? ' · ' + esc(log.run.model) : ' (seeded)'}</span>` +
     `<span class="badge ok">corpus: local only</span>` +
     `<span class="badge" title="${esc(Object.entries(pii).map(([k,v]) => k + ': ' + v).join(', '))}">pass 0 flagged ${piiTotal} identifiable-data locations</span>` +
-    `<span class="badge">${esc(log.run.standard.id)} ${esc(log.run.standard.amendment)}</span>`;
+    `<span class="badge">${esc(log.run.standard.id)} ${esc(log.run.standard.amendment)}</span>` +
+    (run.note ? `<span class="badge" title="${esc(run.note)}">${esc(run.id === 'fixture' ? 'demo fixture' : 'real run · ' + Math.round((log.run.execution_ms || 0) / 1000) + ' s')}</span>` : '');
 
   let current = 0;
   const entries = log.entries;
@@ -127,7 +135,7 @@
 
   async function renderMain() {
     const e = entries[current];
-    if (!e) { document.getElementById('main').innerHTML = '<p>No hazard entries in out/hazard-log.json.</p>'; return; }
+    if (!e) { document.getElementById('main').innerHTML = `<p>This run produced no hazard entries that passed verification. ${(findings.dropped || []).length} candidate${(findings.dropped || []).length === 1 ? ' was' : 's were'} discarded.</p>`; return; }
     const f = findings.findings.find(x => x.id === e.finding_id) || {};
     const r = rate(e.proposed_severity, e.proposed_likelihood);
     const so = store.get(e.hazard_id);

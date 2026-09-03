@@ -1,0 +1,617 @@
+{
+  "run": {
+    "engine": "GEMMA_LOCAL",
+    "model": "gemma3:12b",
+    "timestamp": "2026-09-03T18:36:57.409Z",
+    "execution_ms": 370992,
+    "corpus_files": [
+      "FLLD-CLIN-v2.md",
+      "FLLD-DM-v3.md",
+      "field-mapping.csv",
+      "teams-export.txt"
+    ]
+  },
+  "requirements": [
+    {
+      "id": "CLIN-11-R01",
+      "statement": "The Aurora Allergy & Intolerance clinical summary panel shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions.",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 16,
+      "excerpt": "shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions.",
+      "author": "Dr Fiona Gallagher",
+      "date": "19 February 2026",
+      "status": "APPROVED",
+      "workstream": "Clinical Design & Patient Safety",
+      "source": "model"
+    },
+    {
+      "id": "CLIN-11-R02",
+      "statement": "Legacy allergy data must never populate a clinical field, because the Clinical Safety Group ruled it unsafe for prescribing due to inconsistent coding and unverified severity in the legacy PAS.",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 19,
+      "excerpt": "must never populate a clinical field, because the Clinical Safety Group ruled it unsafe for prescribing due to inconsistent coding and unverified severity in the legacy PAS.",
+      "author": "Dr Fiona Gallagher",
+      "date": "19 February 2026",
+      "status": "APPROVED",
+      "workstream": "Clinical Design & Patient Safety",
+      "source": "model"
+    },
+    {
+      "id": "CLIN-11-R03",
+      "statement": "Allergy and intolerance profiles shall be captured directly from the patient by an authorised registered prescriber during the patient's first physical or virtual clinical appointment after go-live.",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 22,
+      "excerpt": "shall be captured directly from the patient by an authorised registered prescriber during the patient's first physical or virtual clinical appointment after go-live.",
+      "author": "Dr Fiona Gallagher",
+      "date": "19 February 2026",
+      "status": "APPROVED",
+      "workstream": "Clinical Design & Patient Safety",
+      "source": "model"
+    },
+    {
+      "id": "CLIN-11-R04",
+      "statement": "The electronic prescribing and medicines administration (ePMA) module shall enforce a hard-stop blocking all non-emergency drug orders until point-of-care allergy reconciliation has been completed by an authorised clinician.",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 25,
+      "excerpt": "shall enforce a hard-stop blocking all non-emergency drug orders until point-of-care allergy reconciliation has been completed by an authorised clinician.",
+      "author": "Dr Fiona Gallagher",
+      "date": "19 February 2026",
+      "status": "APPROVED",
+      "workstream": "Clinical Design & Patient Safety",
+      "source": "model"
+    },
+    {
+      "id": "CLIN-11-R05",
+      "statement": "Allergy severity and adverse reaction manifestations shall be captured directly from the patient at first appointment, never inferred or derived from automated algorithms or unverified historical free-text notes.",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 28,
+      "excerpt": "shall be captured directly from the patient at first appointment, never inferred or derived from automated algorithms or unverified historical free-text notes.",
+      "author": "Dr Fiona Gallagher",
+      "date": "19 February 2026",
+      "status": "APPROVED",
+      "workstream": "Clinical Design & Patient Safety",
+      "source": "model"
+    },
+    {
+      "id": "CLIN-11-R06",
+      "statement": "Point-of-care captured allergies shall immediately trigger real-time drug-allergy interaction (DAI) alerts within the Aurora pharmacy engine upon confirmed clinician signing.",
+      "file": "FLLD-CLIN-v2.md",
+      "line": 31,
+      "excerpt": "shall immediately trigger real-time drug-allergy interaction (DAI) alerts within the Aurora pharmacy engine upon confirmed clinician signing.",
+      "author": "Dr Fiona Gallagher",
+      "date": "19 February 2026",
+      "status": "APPROVED",
+      "workstream": "Clinical Design & Patient Safety",
+      "source": "model"
+    },
+    {
+      "id": "DM-04-R01",
+      "statement": "All historical allergy and adverse reaction records associated with active and archived patient master records in CareTrak PAS (approx. 1.4 million records spanning 2004-2025) shall be migrated into Aurora EPR during the cutover window.",
+      "file": "FLLD-DM-v3.md",
+      "line": 20,
+      "excerpt": "shall be migrated into Aurora EPR during the cutover window.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model"
+    },
+    {
+      "id": "DM-04-R02",
+      "statement": "Legacy allergen identifiers and free-text substance labels shall undergo best-effort algorithmic matching against the UK NHS SNOMED CT drug and substance subset (release v34.1).",
+      "file": "FLLD-DM-v3.md",
+      "line": 23,
+      "excerpt": "shall undergo best-effort algorithmic matching against the UK NHS SNOMED CT drug and substance subset (release v34.1).",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model"
+    },
+    {
+      "id": "DM-04-R03",
+      "statement": "All migrated allergy records shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live.",
+      "file": "FLLD-DM-v3.md",
+      "line": 26,
+      "excerpt": "shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model"
+    },
+    {
+      "id": "DM-04-R04",
+      "statement": "Allergy severity classifications (Mild, Moderate, Severe, Life-Threatening) shall be algorithmically inferred from legacy free-text clinical notes and mapped into Aurora severity tiers using regex keyword extraction.",
+      "file": "FLLD-DM-v3.md",
+      "line": 29,
+      "excerpt": "shall be algorithmically inferred from legacy free-text clinical notes and mapped into Aurora severity tiers using regex keyword extraction.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model",
+      "repaired": true,
+      "cited_as": {
+        "file": "FLLD-DM-v3.md",
+        "line": 28
+      }
+    },
+    {
+      "id": "DM-04-R05",
+      "statement": "Where no severity keyword can be parsed from the legacy note, the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible in the clinical summary panel pending review at the patient's next encounter.",
+      "file": "FLLD-DM-v3.md",
+      "line": 32,
+      "excerpt": "the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible in the clinical summary panel pending review at the patient's next encounter.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model"
+    },
+    {
+      "id": "DM-04-R06",
+      "statement": "The system shall preserve the original legacy recording timestamp, legacy clinician ID and migration batch identifier for every migrated allergy entity to support medicolegal compliance.",
+      "file": "FLLD-DM-v3.md",
+      "line": 35,
+      "excerpt": "shall preserve the original legacy recording timestamp, legacy clinician ID and migration batch identifier for every migrated allergy entity to support medicolegal compliance.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model",
+      "repaired": true,
+      "cited_as": {
+        "file": "FLLD-DM-v3.md",
+        "line": 34
+      }
+    },
+    {
+      "id": "DM-04-R07",
+      "statement": "Where duplicate allergy entries exist for a single patient with matching substance concepts, the migration engine shall merge them into a single active record, preserving the highest recorded severity level.",
+      "file": "FLLD-DM-v3.md",
+      "line": 38,
+      "excerpt": "the migration engine shall merge them into a single active record, preserving the highest recorded severity level.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model",
+      "repaired": true,
+      "cited_as": {
+        "file": "FLLD-DM-v3.md",
+        "line": 37
+      }
+    },
+    {
+      "id": "DM-04-R08",
+      "statement": "Allergy records pertaining to paediatric patients under 16 years of age shall carry a mandatory verification flag requiring secondary review at the subsequent hospital encounter.",
+      "file": "FLLD-DM-v3.md",
+      "line": 41,
+      "excerpt": "shall carry a mandatory verification flag requiring secondary review at the subsequent hospital encounter.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model",
+      "repaired": true,
+      "cited_as": {
+        "file": "FLLD-DM-v3.md",
+        "line": 40
+      }
+    },
+    {
+      "id": "DM-04-R09",
+      "statement": "Any record failing structural schema validation shall be diverted to the staging exception queue for manual resolution within 72 hours of cutover completion.",
+      "file": "FLLD-DM-v3.md",
+      "line": 44,
+      "excerpt": "shall be diverted to the staging exception queue for manual resolution within 72 hours of cutover completion.",
+      "author": "David Vance",
+      "date": "14 January 2026",
+      "status": "APPROVED",
+      "workstream": "Patient Data Migration & PAS Cutover",
+      "source": "model",
+      "repaired": true,
+      "cited_as": {
+        "file": "FLLD-DM-v3.md",
+        "line": 43
+      }
+    },
+    {
+      "id": "MAP-ROW-01",
+      "statement": "PAT_ALLERGY_ID -> AUR_ALLERGY_ID | Migrate=Y | Direct 1:1 GUID generation",
+      "file": "field-mapping.csv",
+      "line": 2,
+      "excerpt": "1,PAT_ALLERGY_ID,AUR_ALLERGY_ID,Y,Direct 1:1 GUID generation,D. Vance,12-Jan-2026",
+      "author": "D. Vance",
+      "date": "12-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-02",
+      "statement": "PAT_NHS_NUMBER -> AUR_PATIENT_NHS_NO | Migrate=Y | Format ISO-13606 validation",
+      "file": "field-mapping.csv",
+      "line": 3,
+      "excerpt": "2,PAT_NHS_NUMBER,AUR_PATIENT_NHS_NO,Y,Format ISO-13606 validation,S. Jenkins,14-Jan-2026",
+      "author": "S. Jenkins",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-03",
+      "statement": "ALLERGY_DESC -> AUR_ALLERGEN_NAME | Migrate=Y | Cleanse whitespace trim",
+      "file": "field-mapping.csv",
+      "line": 4,
+      "excerpt": "3,ALLERGY_DESC,AUR_ALLERGEN_NAME,Y,Cleanse whitespace trim,D. Vance,14-Jan-2026",
+      "author": "D. Vance",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-04",
+      "statement": "ALLERGEN_CODE -> AUR_SNOMED_CONCEPT_ID | Migrate=Y | SNOMED CT NHS UK subset map; unmapped -> 716186003",
+      "file": "field-mapping.csv",
+      "line": 5,
+      "excerpt": "4,ALLERGEN_CODE,AUR_SNOMED_CONCEPT_ID,Y,SNOMED CT NHS UK subset map; unmapped -> 716186003,A. Pendelton,14-Jan-2026",
+      "author": "A. Pendelton",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-05",
+      "statement": "REACTION_TYPE -> AUR_REACTION_CATEGORY | Migrate=Y | Map Enum (Allergy|Intolerance|Adverse)",
+      "file": "field-mapping.csv",
+      "line": 6,
+      "excerpt": "5,REACTION_TYPE,AUR_REACTION_CATEGORY,Y,Map Enum (Allergy|Intolerance|Adverse),D. Vance,14-Jan-2026",
+      "author": "D. Vance",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-06",
+      "statement": "SEVERITY_CODE -> AUR_SEVERITY_LEVEL | Migrate=N | Do not migrate - free text derivation cancelled by Pharmacy SME",
+      "file": "field-mapping.csv",
+      "line": 7,
+      "excerpt": "6,SEVERITY_CODE,AUR_SEVERITY_LEVEL,N,Do not migrate - free text derivation cancelled by Pharmacy SME,M. Brody,05-Mar-2026",
+      "author": "M. Brody",
+      "date": "05-Mar-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-07",
+      "statement": "DATE_RECORDED -> AUR_RECORDED_DATETIME | Migrate=Y | Convert DD/MM/YYYY to UTC ISO-8601",
+      "file": "field-mapping.csv",
+      "line": 8,
+      "excerpt": "7,DATE_RECORDED,AUR_RECORDED_DATETIME,Y,Convert DD/MM/YYYY to UTC ISO-8601,S. Jenkins,14-Jan-2026",
+      "author": "S. Jenkins",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-08",
+      "statement": "RECORDING_CLINICIAN_ID -> AUR_ORIGINATING_STAFF_REF | Migrate=Y | Lookup GMC/NMC master table",
+      "file": "field-mapping.csv",
+      "line": 9,
+      "excerpt": "8,RECORDING_CLINICIAN_ID,AUR_ORIGINATING_STAFF_REF,Y,Lookup GMC/NMC master table,D. Vance,14-Jan-2026",
+      "author": "D. Vance",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-09",
+      "statement": "STATUS_FLAG -> AUR_ACTIVE_STATUS | Migrate=Y | Map (A->Active; I->Resolved)",
+      "file": "field-mapping.csv",
+      "line": 10,
+      "excerpt": "9,STATUS_FLAG,AUR_ACTIVE_STATUS,Y,Map (A->Active; I->Resolved),D. Vance,14-Jan-2026",
+      "author": "D. Vance",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-10",
+      "statement": "CLINICAL_COMMENTS -> AUR_HISTORICAL_NOTES | Migrate=Y | Truncate 4000 chars; sanitise HTML",
+      "file": "field-mapping.csv",
+      "line": 11,
+      "excerpt": "10,CLINICAL_COMMENTS,AUR_HISTORICAL_NOTES,Y,Truncate 4000 chars; sanitise HTML,A. Pendelton,14-Jan-2026",
+      "author": "A. Pendelton",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-11",
+      "statement": "VERIFICATION_STATUS -> AUR_CONFIRMATION_STATE | Migrate=Y | Default to Unconfirmed_Legacy",
+      "file": "field-mapping.csv",
+      "line": 12,
+      "excerpt": "11,VERIFICATION_STATUS,AUR_CONFIRMATION_STATE,Y,Default to Unconfirmed_Legacy,D. Vance,14-Jan-2026",
+      "author": "D. Vance",
+      "date": "14-Jan-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "MAP-ROW-12",
+      "statement": "WARD_LOCATION_CODE -> AUR_CARE_SETTING_ID | Migrate=Y | Direct lookup pending Ward Master ref",
+      "file": "field-mapping.csv",
+      "line": 13,
+      "excerpt": "12,WARD_LOCATION_CODE,AUR_CARE_SETTING_ID,Y,Direct lookup pending Ward Master ref,M. Brody,04-Mar-2026",
+      "author": "M. Brody",
+      "date": "04-Mar-2026",
+      "status": "DRAFT",
+      "workstream": "Data Migration (mapping sheet)",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-01",
+      "statement": "Morning all. We are finalising the DM-04 migration scripts for the dry run next Tuesday. Any pending questions on the allergy schema?",
+      "file": "teams-export.txt",
+      "line": 1,
+      "excerpt": "[2026-03-03 09:14:22] David Vance: Morning all. We are finalising the DM-04 migration scripts for the dry run next Tuesday. Any pending questions on the allergy schema?",
+      "author": "David Vance",
+      "date": "2026-03-03 09:14:22",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-02",
+      "statement": "Hi David. I reviewed the severity transformation logic in DM-04-R04. We can't derive severity from free text, it's a prescribing risk.",
+      "file": "teams-export.txt",
+      "line": 2,
+      "excerpt": "[2026-03-03 09:21:05] Marcus Brody (Pharmacy SME): Hi David. I reviewed the severity transformation logic in DM-04-R04. We can't derive severity from free text, it's a prescribing risk.",
+      "author": "Marcus Brody (Pharmacy SME)",
+      "date": "2026-03-03 09:21:05",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-03",
+      "statement": "Marcus is completely right. Clinical Safety Group reviewed this last Thursday. Free-text severity inference generates false high-risk flags and misses anaphylaxis cases. It cannot go live.",
+      "file": "teams-export.txt",
+      "line": 3,
+      "excerpt": "[2026-03-03 09:23:40] Dr Eleanor Vance (Pharmacy Lead): Marcus is completely right. Clinical Safety Group reviewed this last Thursday. Free-text severity inference generates false high-risk flags and misses anaphylaxis cases. It cannot go live.",
+      "author": "Dr Eleanor Vance (Pharmacy Lead)",
+      "date": "2026-03-03 09:23:40",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-04",
+      "statement": "Concrete example from the dry-run extract: NHS number 943 476 5919, Priya Ramasubramanian, DOB 12/08/1987. Legacy note reads \"penicillin - anaphylaxis 2011, ITU\". The regex missed \"anaphylaxis\" because of the line break and the record came through as severity Unknown.",
+      "file": "teams-export.txt",
+      "line": 4,
+      "excerpt": "[2026-03-03 09:26:02] Marcus Brody: Concrete example from the dry-run extract: NHS number 943 476 5919, Priya Ramasubramanian, DOB 12/08/1987. Legacy note reads \"penicillin - anaphylaxis 2011, ITU\". The regex missed \"anaphylaxis\" because of the line break and the record came through as severity Unknown.",
+      "author": "Marcus Brody",
+      "date": "2026-03-03 09:26:02",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-05",
+      "statement": "Understood Eleanor. If pharmacy rejects automated derivation, we need to drop Row 6 from the active ETL payload.",
+      "file": "teams-export.txt",
+      "line": 5,
+      "excerpt": "[2026-03-03 09:28:15] David Vance: Understood Eleanor. If pharmacy rejects automated derivation, we need to drop Row 6 from the active ETL payload.",
+      "author": "David Vance",
+      "date": "2026-03-03 09:28:15",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-06",
+      "statement": "Perfect. I will update Row 6 on field-mapping.csv right now to set Migrate=N.",
+      "file": "teams-export.txt",
+      "line": 6,
+      "excerpt": "[2026-03-03 09:31:00] Marcus Brody: Perfect. I will update Row 6 on field-mapping.csv right now to set Migrate=N.",
+      "author": "Marcus Brody",
+      "date": "2026-03-03 09:31:00",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-07",
+      "statement": "Thanks Marcus. The scheduled joint walkthrough for Wednesday is cancelled due to the trust board meeting, so we will skip formal minuting for now.",
+      "file": "teams-export.txt",
+      "line": 7,
+      "excerpt": "[2026-03-03 09:34:12] David Vance: Thanks Marcus. The scheduled joint walkthrough for Wednesday is cancelled due to the trust board meeting, so we will skip formal minuting for now.",
+      "author": "David Vance",
+      "date": "2026-03-03 09:34:12",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-08",
+      "statement": "Note that FLLD-DM-04 needs a version bump to reflect the severity cancellation before the final sign-off audit.",
+      "file": "teams-export.txt",
+      "line": 8,
+      "excerpt": "[2026-03-03 09:35:48] Sarah Jenkins: Note that FLLD-DM-04 needs a version bump to reflect the severity cancellation before the final sign-off audit.",
+      "author": "Sarah Jenkins",
+      "date": "2026-03-03 09:35:48",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-09",
+      "statement": "Also noticed Row 12 has a dependency on ward-code mapping from the legacy PAS, but there is no approved design document for ward-level location translation.",
+      "file": "teams-export.txt",
+      "line": 9,
+      "excerpt": "[2026-03-03 09:38:10] Marcus Brody: Also noticed Row 12 has a dependency on ward-code mapping from the legacy PAS, but there is no approved design document for ward-level location translation.",
+      "author": "Marcus Brody",
+      "date": "2026-03-03 09:38:10",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-10",
+      "statement": "Good spot Marcus. We have no design covering ward code transformations yet. Let's park that until the PAS team responds.",
+      "file": "teams-export.txt",
+      "line": 10,
+      "excerpt": "[2026-03-03 09:41:04] David Vance: Good spot Marcus. We have no design covering ward code transformations yet. Let's park that until the PAS team responds.",
+      "author": "David Vance",
+      "date": "2026-03-03 09:41:04",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-11",
+      "statement": "Has anyone logged a change request to update FLLD-DM-04 itself? The approved PDF still states DM-04-R04 and DM-04-R05 are active.",
+      "file": "teams-export.txt",
+      "line": 11,
+      "excerpt": "[2026-03-03 09:45:30] Arthur Pendelton: Has anyone logged a change request to update FLLD-DM-04 itself? The approved PDF still states DM-04-R04 and DM-04-R05 are active.",
+      "author": "Arthur Pendelton",
+      "date": "2026-03-03 09:45:30",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-12",
+      "statement": "Not yet, everyone is flat out on the cutover dry run. We'll pick up doc updates post-dry run.",
+      "file": "teams-export.txt",
+      "line": 12,
+      "excerpt": "[2026-03-03 09:47:11] Sarah Jenkins: Not yet, everyone is flat out on the cutover dry run. We'll pick up doc updates post-dry run.",
+      "author": "Sarah Jenkins",
+      "date": "2026-03-03 09:47:11",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-13",
+      "statement": "Separate point for the paediatric batch. The safeguarding flag on the CareTrak record for the Okafor child (NHS 621 903 4471) is held in CLINICAL_COMMENTS, not a coded field. If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?",
+      "file": "teams-export.txt",
+      "line": 13,
+      "excerpt": "[2026-03-03 10:02:37] Dr Eleanor Vance: Separate point for the paediatric batch. The safeguarding flag on the CareTrak record for the Okafor child (NHS 621 903 4471) is held in CLINICAL_COMMENTS, not a coded field. If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?",
+      "author": "Dr Eleanor Vance",
+      "date": "2026-03-03 10:02:37",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-14",
+      "statement": "Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint.",
+      "file": "teams-export.txt",
+      "line": 14,
+      "excerpt": "[2026-03-03 10:05:49] David Vance: Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint.",
+      "author": "David Vance",
+      "date": "2026-03-03 10:05:49",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    },
+    {
+      "id": "CHAT-15",
+      "statement": "Also a reminder that every week we slip past 30 June is £412k to CareTrak under schedule 4. The board has asked for the migration to complete on schedule.",
+      "file": "teams-export.txt",
+      "line": 15,
+      "excerpt": "[2026-03-03 10:07:20] Sarah Jenkins: Also a reminder that every week we slip past 30 June is £412k to CareTrak under schedule 4. The board has asked for the migration to complete on schedule.",
+      "author": "Sarah Jenkins",
+      "date": "2026-03-03 10:07:20",
+      "status": "VERBAL",
+      "workstream": "Decision channel",
+      "source": "pass0"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "type": "CONTRADICTION",
+      "title": "Conflicting requirements on legacy data population",
+      "why_incompatible": "CLIN-11-R01 and CLIN-11-R02 both state that legacy allergy data should not populate the clinical summary panel, but DM-04-R03 states that migrated allergy records *will* be visible in the panel at go-live. This creates a conflict regarding the state of migrated data.",
+      "clinical_consequence": "Patients may be exposed to inaccurate or unverified allergy information, potentially leading to adverse drug reactions or inappropriate treatment decisions.",
+      "sources": [
+        {
+          "file": "FLLD-CLIN-v2.md",
+          "line": 16,
+          "excerpt": "shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions.",
+          "verified": true
+        },
+        {
+          "file": "FLLD-CLIN-v2.md",
+          "line": 19,
+          "excerpt": "must never populate a clinical field, because the Clinical Safety Group ruled it unsafe for prescribing due to inconsistent coding and unverified severity in the legacy PAS.",
+          "verified": true
+        },
+        {
+          "file": "FLLD-DM-v3.md",
+          "line": 26,
+          "excerpt": "shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live.",
+          "verified": true
+        }
+      ]
+    },
+    {
+      "id": "F-02",
+      "type": "UNOWNED_DECISION",
+      "title": "Paediatric safeguarding note truncation",
+      "why_incompatible": "CHAT-13 raises a concern that safeguarding notes for paediatric patients may be truncated due to Row 10's 4000-character limit. CHAT-14 deflects this question to the PAS safeguarding lead, leaving the resolution of this potential data loss unowned.",
+      "clinical_consequence": "Critical safeguarding information for paediatric patients may be lost, potentially leading to inadequate protection and increased risk of harm.",
+      "sources": [
+        {
+          "file": "teams-export.txt",
+          "line": 13,
+          "excerpt": "The safeguarding flag on the CareTrak record for the Okafor child (NHS 621 903 4471) is held in CLINICAL_COMMENTS, not a coded field. If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?",
+          "verified": true
+        },
+        {
+          "file": "teams-export.txt",
+          "line": 14,
+          "excerpt": "Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint.",
+          "verified": true
+        }
+      ]
+    },
+    {
+      "id": "F-03",
+      "type": "ORPHAN_DEPENDENCY",
+      "title": "Ward code mapping dependency",
+      "why_incompatible": "DM-04-R12 states that AUR_CARE_SETTING_ID will be populated via a direct lookup pending a Ward Master ref. CHAT-09 and CHAT-10 highlight that there is no approved design document for ward-level location translation, creating a dependency on a non-existent design.",
+      "clinical_consequence": "Patient location data may be inaccurate or missing, potentially hindering care coordination and impacting patient safety.",
+      "sources": [
+        {
+          "file": "FLLD-DM-v3.md",
+          "line": 41,
+          "excerpt": "shall carry a mandatory verification flag requiring secondary review at the subsequent hospital encounter.",
+          "verified": true
+        },
+        {
+          "file": "teams-export.txt",
+          "line": 9,
+          "excerpt": "Also noticed Row 12 has a dependency on ward-code mapping from the legacy PAS, but there is no approved design document for ward-level location translation.",
+          "verified": true
+        }
+      ]
+    }
+  ],
+  "dropped": []
+}

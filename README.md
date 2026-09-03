@@ -62,7 +62,7 @@ These artefacts live in tools today. None of those tools reads across them, and 
 
 ## The build
 
-A local Gemma model reads all four artefacts as one corpus and returns candidate hazards. Every hazard cites file and line in at least two documents, and every citation is checked in code against the source text before it is shown. A hazard whose quote is not on the line it claims is discarded, not surfaced. Gemini goes online only for isolated terms: a SNOMED code, a standard reference. It never sees a document line.
+A local Gemma model reads all four artefacts as one corpus and returns candidate hazards. Every hazard cites at least two sources by file and line, and anything that claims a relationship between documents (a contradiction, a silent default, a verbal override, an orphan dependency) must cite two different documents; an unowned decision may live in two lines of one channel. Every citation is checked in code against the source text before it is shown. The excerpt is the proof: if the model quotes a line verbatim but mislabels where it came from, and the quote is found on exactly one line of the corpus, the address is corrected to that line and shown as corrected. A quote that is nowhere in the corpus, or in several places, is discarded with its finding. Gemini goes online only for isolated terms: a SNOMED code, a standard reference. It never sees a document line.
 
 ```
 corpus/                       local, never leaves the machine
@@ -89,7 +89,7 @@ corpus/                       local, never leaves the machine
   Gemini (online, optional, one function): a term in, a lookup out.
 ```
 
-**Invariant:** the corpus never leaves the machine. Gemini receives only isolated terms, never document content. This is enforced in code, not prose: the local client refuses any host that is not loopback, the Gemini client has no import that can read a file and takes a single short string, and `test/boundary.test.ts` asserts all three.
+**Invariant:** the corpus never leaves the machine. Every run reported here, including both live Gemma runs below, executed against a loopback Ollama with no other network access. Gemini receives only isolated terms, never document content. This is enforced in code, not prose: the local client refuses any host that is not loopback, the Gemini client has no import that can read a file and takes a single short string, and `test/boundary.test.ts` asserts all three.
 
 ## Why these two models
 
@@ -103,6 +103,8 @@ Gemini handles what a local model cannot: the current text and version of a stan
 
 The sign-off panel is pre-filled with the proposal. A named Clinical Safety Officer can confirm it, amend severity or likelihood before signing, or reject it with a reason. Only signed entries export. Residual risk is deliberately not automated.
 
+The selector in the header switches between the authored fixture and the two live runs archived under `docs/runs/`; the badge says which one you are looking at and how long the real run took.
+
 Five entries ship in the fixture, from the same corpus:
 
 | | Hazard | Proposed |
@@ -112,6 +114,24 @@ Five entries ship in the fixture, from the same corpus:
 | HZ-003 | Approved design and build artefacts disagree on severity derivation; the decision exists only in chat | Considerable · High · risk 3 |
 | HZ-004 | Ward location codes migrate through an undefined lookup | Significant · Medium · risk 2 |
 | HZ-005 | Paediatric safeguarding note truncated by migration; ownership declined | Major · Low · risk 3 |
+
+## Live runs
+
+Both runs are the shipped code against the same corpus, on the machine this was built on (Apple M5, 16 GB), through Ollama on loopback. The outputs are committed unedited under `docs/runs/` and held to the same tests as the fixture: every quote must resolve to its line.
+
+| | gemma3 (4B) | gemma3:12b |
+|---|---|---|
+| Wall clock, three passes | 90 s | 6 min 11 s |
+| Design requirements extracted with exact provenance | 9 of 15 | 15 of 15 |
+| Addresses corrected from the excerpt | 3 | 5 |
+| Findings that passed verification | 2 | 3 |
+| Candidates discarded | 0 | 0 |
+| Planted defects found (of 5) | 1, loosely | 3: the panel contradiction, the unowned safeguarding decision, the ward-code orphan |
+| Proposed severity for the headline hazard | Significant · Medium | Considerable · Medium |
+
+The first 4B run, before excerpt-anchored correction, produced zero findings: every candidate quoted a real line and mislabelled its address, and the verifier dropped all of them. That run is what motivated the correction rule, and the rule is deliberately narrow: a quote is only re-addressed when it exists on exactly one line.
+
+What the 12B run got right is the point of the build: it found the contradiction between the two approved designs and cited line 16 of one and line 26 of the other, unprompted, with nothing fabricated surviving to the page. What it missed is the honest part: the *severity Unknown* mechanism inside that contradiction, the *No known allergy* fallback, and the cancelled-in-chat severity derivation. A Clinical Safety Officer would also raise its Considerable to Major.
 
 ## Run it
 
@@ -125,13 +145,14 @@ make run         # Pass 0 + three local Gemma passes via Ollama -> out/*.json
 make lookup TERM=716186003   # the narrow online path (needs GEMINI_API_KEY)
 ```
 
-For `make run`: install [Ollama](https://ollama.com), then `ollama pull gemma3`. Override the tag with `HAZLOG_MODEL=gemma3:12b` if you have pulled a larger one.
+For `make run`: install [Ollama](https://ollama.com), then `ollama pull gemma3`. On a 16 GB machine `ollama pull gemma3:12b` and `HAZLOG_MODEL=gemma3:12b make run` is markedly better and takes about six minutes.
 
 ## Limits
 
 - **The corpus is synthetic.** Four artefacts, written for this demo to contain five defects. It is shaped like a real programme's artefacts; it is not one.
 - **Severity and likelihood are proposals.** The rating is computed from the matrix, never asserted by the model, and none of it is a hazard log entry until a named CSO signs. The UI records the signature in the browser only.
-- **The fixture is the demo.** `out/hazard-log.json` and `out/findings.json` are committed, and `make test` holds them to the same rule as a live run: every excerpt must resolve to its line, every finding must span two files. The local Gemma path is wired, schema-constrained and exercised end to end against a fake Ollama on loopback that returns canned output containing a fabricated citation, a single-file finding and an off-scale severity; `test/pipeline.test.ts` asserts all three are dropped with a reason and the real one survives. It has not been run against a live model on the machine this was built on, because Ollama was not installed there. Run `make run` and the engine badge changes from FIXTURE to GEMMA_LOCAL.
+- **The fixture is the default view, not the only one.** `out/hazard-log.json` was authored to show all five planted defects. The live runs in `docs/runs/` are what the local model actually produces; the 12B run finds three of the five. Both are held to the same tests: every quote resolves to its line, every relationship finding spans two documents.
+- **Verified means the quote is there, not that it supports the claim.** In the 12B run, HZ-003 (ward-code orphan dependency) reasons correctly from Row 12 of the mapping sheet and two chat lines, then cites line 41 of the migration design, which is the paediatric verification flag and says nothing about ward codes. The line is real, the quote is verbatim, the citation verifies, and it is the wrong evidence. Provenance checking catches fabrication; it does not catch irrelevance. That is a reviewer's job and the UI puts the line in front of them for that reason.
 - **Four artefacts.** Cross-document detection at this corpus size fits in one context window. Beyond that it needs chunking and a second pass over pairs, and that is not built.
 - **The risk matrix** in `shared/risk-matrix.json` is Tables 7 to 10 of the DCB0160 Implementation Guidance v4.2 (02.05.2018), checked cell for cell against the official PDF on 3 September 2026 and pinned by a test. The guidance calls those tables *examples*: an organisation's own Clinical Risk Management Plan (3.2.1) defines the criteria it actually uses, so a trust would swap in its own. Clause numbers are from the Requirements Specification v3.2.
 - **The Gemini lookup** is one function and has not been exercised against a live key here. It is tested with a fake fetch that captures the request and checks no corpus line is in it.

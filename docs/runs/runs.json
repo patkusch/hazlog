@@ -1,0 +1,22 @@
+{
+  "runs": [
+    {
+      "id": "fixture",
+      "label": "Authored fixture (demo)",
+      "path": "/out",
+      "note": "Written for the demo; five planted defects, all cited and verified."
+    },
+    {
+      "id": "gemma3-12b",
+      "label": "Live: gemma3:12b, local",
+      "path": "/docs/runs/gemma3-12b",
+      "note": "Real run, 6 min 11 s on an Apple M5 with 16 GB. 15 of 15 design requirements extracted with exact provenance (5 addresses corrected from their excerpt); 3 findings, 0 dropped: the cross-document contradiction, the unowned safeguarding decision, the ward-code orphan dependency. HZ-003 cites a real line that does not support its claim; see README, Limits."
+    },
+    {
+      "id": "gemma3-4b",
+      "label": "Live: gemma3 (4B), local",
+      "path": "/docs/runs/gemma3-4b",
+      "note": "Real run, 90 s. Provenance exact after excerpt correction; the reasoning is thin and one finding pairs unrelated lines."
+    }
+  ]
+}

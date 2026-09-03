@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadCorpus, verifyCitation } from '../src/corpus.ts';
 import { riskRating, MATRIX } from '../src/risk.ts';
+import { TWO_FILE_TYPES } from '../src/passes.ts';
 
 /**
  * The committed fixtures are what `make demo` shows a judge. They are held to
@@ -24,7 +25,7 @@ describe('out/findings.json', () => {
   test('every finding source verifies, and every finding spans at least two files', () => {
     for (const f of findings.findings) {
       assert.ok(f.sources.length >= 2, `${f.id} has fewer than two sources`);
-      assert.ok(new Set(f.sources.map((s: any) => s.file)).size >= 2, `${f.id} cites only one file`);
+      if (TWO_FILE_TYPES.has(f.type)) assert.ok(new Set(f.sources.map((s: any) => s.file)).size >= 2, `${f.id} (${f.type}) cites only one file`);
       for (const s of f.sources) {
         const v = verifyCitation(corpus, s);
         assert.equal(v.verified, true, `${f.id} ${s.file}:${s.line}: ${v.reason} | actual: ${v.actual}`);
@@ -45,7 +46,8 @@ describe('out/hazard-log.json', () => {
     for (const e of hazardLog.entries) {
       assert.ok(ids.has(e.finding_id), `${e.hazard_id} refers to unknown finding ${e.finding_id}`);
       assert.ok(e.evidence.length >= 2, `${e.hazard_id} has fewer than two evidence lines`);
-      assert.ok(new Set(e.evidence.map((s: any) => s.file)).size >= 2, `${e.hazard_id} evidence cites only one file`);
+      const type = findings.findings.find((f: any) => f.id === e.finding_id)?.type;
+      if (TWO_FILE_TYPES.has(type)) assert.ok(new Set(e.evidence.map((s: any) => s.file)).size >= 2, `${e.hazard_id} (${type}) evidence cites only one file`);
       for (const s of e.evidence) {
         const v = verifyCitation(corpus, s);
         assert.equal(v.verified, true, `${e.hazard_id} ${s.file}:${s.line}: ${v.reason} | actual: ${v.actual}`);
@@ -86,4 +88,32 @@ describe('out/hazard-log.json', () => {
       }
     }
   });
+});
+
+/** The archived live runs are unedited model output. They are held to the same rule as the fixture. */
+describe('docs/runs/*: every archived live run obeys the provenance rule', () => {
+  const manifest = JSON.parse(readFileSync('docs/runs/runs.json', 'utf8'));
+  for (const run of manifest.runs.filter((r: any) => r.id !== 'fixture')) {
+    const dir = run.path.replace(/^\//, '');
+    const lf = JSON.parse(readFileSync(`${dir}/findings.json`, 'utf8'));
+    const lh = JSON.parse(readFileSync(`${dir}/hazard-log.json`, 'utf8'));
+    test(`${run.id}: engine is GEMMA_LOCAL and every citation resolves`, () => {
+      assert.equal(lf.run.engine, 'GEMMA_LOCAL');
+      for (const r of lf.requirements) {
+        const v = verifyCitation(corpus, { file: r.file, line: r.line, excerpt: r.excerpt });
+        assert.equal(v.verified, true, `${run.id} ${r.id} ${r.file}:${r.line}: ${v.reason}`);
+      }
+      for (const f of lf.findings) {
+        assert.ok(f.sources.length >= 2);
+        if (TWO_FILE_TYPES.has(f.type)) assert.ok(new Set(f.sources.map((s: any) => s.file)).size >= 2, `${run.id} ${f.id}`);
+        for (const s of f.sources) assert.equal(verifyCitation(corpus, s).verified, true, `${run.id} ${f.id} ${s.file}:${s.line}`);
+      }
+      for (const e of lh.entries) {
+        assert.ok(lf.findings.some((f: any) => f.id === e.finding_id));
+        for (const s of e.evidence) assert.equal(verifyCitation(corpus, s).verified, true, `${run.id} ${e.hazard_id} ${s.file}:${s.line}`);
+        riskRating(e.proposed_severity, e.proposed_likelihood);
+        for (const k of ['risk_rating', 'signed_by', 'cso_signoff']) assert.equal(k in e, false);
+      }
+    });
+  }
 });

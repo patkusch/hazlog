@@ -1,0 +1,145 @@
+{
+  "run": {
+    "engine": "GEMMA_LOCAL",
+    "model": "gemma3:12b",
+    "timestamp": "2026-09-03T18:36:57.409Z",
+    "execution_ms": 370992,
+    "corpus_files": [
+      "FLLD-CLIN-v2.md",
+      "FLLD-DM-v3.md",
+      "field-mapping.csv",
+      "teams-export.txt"
+    ],
+    "note": "Severity and likelihood are proposals. Nothing here is a confirmed hazard log entry until a Clinical Safety Officer signs it (DCB0160 3.3.2).",
+    "standard": {
+      "id": "DCB0160",
+      "amendment": "Amd 25/2018",
+      "version": "3.2",
+      "published": "7 June 2018",
+      "legal_basis": "Section 250, Health and Social Care Act 2012"
+    }
+  },
+  "entries": [
+    {
+      "finding_id": "F-01",
+      "hazard_name": "Conflicting Allergy Data Visibility",
+      "hazard_description": "Conflicting requirements exist regarding the visibility of legacy allergy data in the Aurora clinical summary panel, potentially leading to inaccurate or unverified allergy information being presented to clinicians.",
+      "causes": [
+        "CLIN-11-R01 states legacy allergy data should be unpopulated at go-live.",
+        "CLIN-11-R02 states legacy allergy data must never populate a clinical field.",
+        "DM-04-R03 states migrated allergy records *will* be visible in the panel at go-live."
+      ],
+      "clinical_effect": "Patients may be exposed to inaccurate or unverified allergy information, potentially leading to adverse drug reactions or inappropriate treatment decisions.",
+      "existing_controls": [
+        "The Clinical Safety Group ruled it unsafe for prescribing due to inconsistent coding and unverified severity in the legacy PAS (FLLD-CLIN-v2.md:19)"
+      ],
+      "proposed_severity": "Considerable",
+      "proposed_likelihood": "Medium",
+      "proposed_controls": [
+        "Resolve the conflict between requirements by ensuring DM-04-R03 is revised to align with CLIN-11-R01 and CLIN-11-R02, preventing migrated allergy data from populating the clinical summary panel at go-live."
+      ],
+      "proposed_owner_role": "Migration Architect",
+      "evidence": [
+        {
+          "file": "FLLD-CLIN-v2.md",
+          "line": 16,
+          "excerpt": "shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions.",
+          "verified": true
+        },
+        {
+          "file": "FLLD-DM-v3.md",
+          "line": 26,
+          "excerpt": "shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live.",
+          "verified": true
+        }
+      ],
+      "hazard_id": "HZ-001",
+      "standard_refs": [
+        "DCB0160 4.3.1 identify hazards in normal and fault conditions",
+        "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
+        "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
+      ]
+    },
+    {
+      "finding_id": "F-02",
+      "hazard_name": "Paediatric Safeguarding Note Truncation",
+      "hazard_description": "Safeguarding notes for paediatric patients may be truncated due to a 4000-character limit, potentially leading to inadequate protection and increased risk of harm.",
+      "causes": [
+        "Row 10 of the data mapping truncates clinical comments at 4000 characters.",
+        "The safeguarding flag is held in CLINICAL_COMMENTS, not a coded field.",
+        "Responsibility for resolving this issue has been deflected to the PAS safeguarding lead."
+      ],
+      "clinical_effect": "Critical safeguarding information for paediatric patients may be lost, potentially leading to inadequate protection and increased risk of harm.",
+      "existing_controls": [
+        "None recorded"
+      ],
+      "proposed_severity": "Major",
+      "proposed_likelihood": "Low",
+      "proposed_controls": [
+        "Review the data mapping (Row 10) to increase the character limit for CLINICAL_COMMENTS or explore alternative methods for capturing and displaying safeguarding information.",
+        "Escalate the issue to the PAS safeguarding lead to ensure ownership and resolution."
+      ],
+      "proposed_owner_role": "PAS Safeguarding Lead",
+      "evidence": [
+        {
+          "file": "teams-export.txt",
+          "line": 13,
+          "excerpt": "The safeguarding flag on the CareTrak record for the Okafor child (NHS 621 903 4471) is held in CLINICAL_COMMENTS, not a coded field. If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?",
+          "verified": true
+        },
+        {
+          "file": "teams-export.txt",
+          "line": 14,
+          "excerpt": "Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint.",
+          "verified": true
+        }
+      ],
+      "hazard_id": "HZ-002",
+      "standard_refs": [
+        "DCB0160 4.3.1 identify hazards in normal and fault conditions",
+        "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
+        "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
+      ]
+    },
+    {
+      "finding_id": "F-03",
+      "hazard_name": "Ward Code Mapping Dependency",
+      "hazard_description": "Patient location data may be inaccurate or missing due to a dependency on a non-existent design document for ward-level location translation.",
+      "causes": [
+        "DM-04-R12 states AUR_CARE_SETTING_ID will be populated via a direct lookup pending a Ward Master ref.",
+        "CHAT-09 and CHAT-10 highlight the absence of an approved design document for ward-level location translation."
+      ],
+      "clinical_effect": "Patient location data may be inaccurate or missing, potentially hindering care coordination and impacting patient safety.",
+      "existing_controls": [
+        "A mandatory verification flag will be applied to records (FLLD-DM-v3.md:41)"
+      ],
+      "proposed_severity": "Minor",
+      "proposed_likelihood": "Medium",
+      "proposed_controls": [
+        "Develop and approve a design document for ward-level location translation.",
+        "Implement a temporary workaround for populating AUR_CARE_SETTING_ID until the design document is approved."
+      ],
+      "proposed_owner_role": "Migration Architect",
+      "evidence": [
+        {
+          "file": "FLLD-DM-v3.md",
+          "line": 41,
+          "excerpt": "shall carry a mandatory verification flag requiring secondary review at the subsequent hospital encounter.",
+          "verified": true
+        },
+        {
+          "file": "teams-export.txt",
+          "line": 9,
+          "excerpt": "Also noticed Row 12 has a dependency on ward-code mapping from the legacy PAS, but there is no approved design document for ward-level location translation.",
+          "verified": true
+        }
+      ],
+      "hazard_id": "HZ-003",
+      "standard_refs": [
+        "DCB0160 4.3.1 identify hazards in normal and fault conditions",
+        "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
+        "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
+      ]
+    }
+  ]
+}
