@@ -1,16 +1,62 @@
+<div align="center">
+
 # HAZLOG
 
-**Two approved documents. Both correct. Together, a hazard nobody logged.**
+### Finds the patient-safety hazards hiding between two approved documents
 
-`make demo` · no network, no model, no key · [what you'll see](#what-youll-see) · [limits](#limits)
+**It reads every design document for a hospital system together, finds where two of them disagree about a patient, and drafts the safety log entry for the Clinical Safety Officer to sign.**
+**Those documents are full of patient details, so the reading happens on your own computer and nothing is uploaded.**
 
-[![HZ-001: two approved designs side by side, the contradicting lines highlighted, the DCB0160 hazard log entry beneath](./docs/hazlog-hz001.png)](./docs/hazlog-hz001.png)
+<br/>
+
+[![HZ-001 in the demo screen: two approved designs side by side, the lines that disagree highlighted, the draft hazard log entry beneath](./docs/hazlog-hz001.png)](./docs/hazlog-hz001.png)
+
+**The demo screen.** Two approved designs side by side, the lines that disagree highlighted, the draft log entry beneath.
+`make demo` needs no network, no model and no key · [What you'll see](#what-youll-see) · [Limits](#limits)
+
+<br/>
+
+[![License](https://img.shields.io/badge/License-MIT-1A1A1A?style=for-the-badge)](./LICENSE)
+[![Tests](https://img.shields.io/badge/tests-47_passing-2ea043?style=for-the-badge)](./test)
+[![Local model](https://img.shields.io/badge/runs_on_a_local_model-Gemma_via_Ollama-1A1A1A?style=for-the-badge)](#why-these-two-models)
+[![CI](https://github.com/patkusch/hazlog/actions/workflows/ci.yml/badge.svg)](https://github.com/patkusch/hazlog/actions/workflows/ci.yml)
+
+</div>
+
+---
+
+## The thirty-second version
+
+A hospital is moving 1.4 million allergy records into a new patient record system. Two teams wrote two designs. Both were approved.
+
+> **FLLD-DM-v3.md** *(data migration design, approved 14 January 2026)*, line 26
+> *"All migrated allergy records shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live."*
+
+> **FLLD-CLIN-v2.md** *(clinical design, approved 19 February 2026)*, line 16
+> *"The Aurora Allergy & Intolerance clinical summary panel shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions."*
+
+One design fills the allergy screen on day one. The other keeps it empty on purpose, because the old data is not safe to prescribe from. Only one can happen.
+
+HAZLOG found this with a local model (gemma3:12b, 6 min 11 s on an Apple M5 with 16 GB) and wrote it up as a DCB0160 hazard log entry. DCB0160 is the NHS standard that makes a hospital list every way a new clinical system could harm a patient; the hazard log is that list. This is the entry exactly as the model wrote it, from [`docs/runs/gemma3-12b/hazard-log.json`](./docs/runs/gemma3-12b/hazard-log.json):
+
+| | HZ-001 |
+|---|---|
+| Hazard | Conflicting Allergy Data Visibility |
+| Clinical effect | Patients may be exposed to inaccurate or unverified allergy information, potentially leading to adverse drug reactions or inappropriate treatment decisions. |
+| Proposed severity · likelihood | Considerable · Medium |
+| Proposed control | Resolve the conflict between requirements by ensuring DM-04-R03 is revised to align with CLIN-11-R01 and CLIN-11-R02, preventing migrated allergy data from populating the clinical summary panel at go-live. |
+| Proposed owner | Migration Architect |
+| Evidence | `FLLD-CLIN-v2.md:16` ✓ · `FLLD-DM-v3.md:26` ✓ |
+
+**Both quotes were checked against the source line before the entry was shown. Nothing is a log entry until a named Clinical Safety Officer signs it.**
+
+The same run missed the sharper problem inside this contradiction, and a Clinical Safety Officer would raise Considerable to Major. Both are written up under [Live runs](#live-runs).
 
 ---
 
 ## The room
 
-A hospital is migrating 1.4 million allergy records to a new electronic patient record.
+The demo screen above shows the sharper problem inside that contradiction.
 
 The data migration design, approved 14 January, says that when the migration cannot parse a severity from a legacy note, the record goes live anyway with severity set to **"Unknown"**, active and visible in the clinical panel.
 
@@ -131,7 +177,7 @@ Both runs are the shipped code against the same corpus, on the machine this was 
 
 The first 4B run, before excerpt-anchored correction, produced zero findings: every candidate quoted a real line and mislabelled its address, and the verifier dropped all of them. That run is what motivated the correction rule, and the rule is deliberately narrow: a quote is only re-addressed when it exists on exactly one line.
 
-What the 12B run got right is the point of the build: it found the contradiction between the two approved designs and cited line 16 of one and line 26 of the other, unprompted, with nothing fabricated surviving to the page. What it missed is the honest part: the *severity Unknown* mechanism inside that contradiction, the *No known allergy* fallback, and the cancelled-in-chat severity derivation. A Clinical Safety Officer would also raise its Considerable to Major.
+What the 12B run got right is the point of the build: it found the contradiction at the top of this page unprompted, and nothing made up survived to the page. What it missed is the honest part: the *severity Unknown* mechanism inside that contradiction, the *No known allergy* fallback, and the cancelled-in-chat severity derivation. A Clinical Safety Officer would also raise its Considerable to Major.
 
 ## Run it
 
