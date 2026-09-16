@@ -72,7 +72,7 @@
       "existing_controls": [
         "None recorded"
       ],
-      "proposed_severity": "Significant",
+      "proposed_severity": "Major",
       "proposed_likelihood": "Medium",
       "proposed_controls": [
         "Clinical review of all records with 'Unknown' severity before migration.",
@@ -98,7 +98,11 @@
         "DCB0160 4.3.1 identify hazards in normal and fault conditions",
         "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
         "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
-      ]
+      ],
+      "severity_rationale": "Raised from Significant to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document).",
+      "severity_raised": true,
+      "severity_raised_from": "Significant",
+      "severity_raised_reason": "Raised from Significant to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document)."
     }
   ]
 }

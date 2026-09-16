@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { loadCorpus, prefixedCorpus, resolveCitation, getLine, type Corpus, type Citation } from './corpus.ts';
 import { buildIndex, type Index } from './prepass.ts';
 import { generateJson, type OllamaOptions } from './ollama.ts';
-import { riskRating } from './risk.ts';
+import { riskRating, applySeverityFloor } from './risk.ts';
 
 const SCHEMAS = JSON.parse(readFileSync(fileURLToPath(new URL('../shared/schema.json', import.meta.url)), 'utf8'));
 
@@ -21,6 +21,7 @@ export type HazardEntry = {
   clinical_effect: string; existing_controls: string[]; proposed_severity: string; severity_rationale?: string;
   proposed_likelihood: string; likelihood_rationale?: string; proposed_controls: string[]; proposed_owner_role: string;
   evidence: Source[]; standard_refs: string[];
+  severity_raised?: true; severity_raised_from?: string; severity_raised_reason?: string;
 };
 export type Dropped = { pass: 1 | 2 | 3; id: string; reason: string; item: unknown };
 
@@ -144,8 +145,10 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
       if (!findings.some((f) => f.id === e.finding_id)) { dropped.push({ pass: 3, id: e.finding_id, reason: 'refers to a finding that was not verified', item: e }); continue; }
       if (!v.ok) { dropped.push({ pass: 3, id: e.finding_id, reason: v.reason!, item: { ...e, evidence: v.sources } }); continue; }
       try { riskRating(e.proposed_severity, e.proposed_likelihood); } catch (err) { dropped.push({ pass: 3, id: e.finding_id, reason: (err as Error).message, item: e }); continue; }
+      // The model proposes; this floor only ever raises it, and only for an explicit "severity: Unknown" left active on a live clinical panel (src/risk.ts).
+      const calibrated = applySeverityFloor(corpus, { ...e, evidence: v.sources });
       entries.push({
-        ...e,
+        ...calibrated,
         hazard_id: `HZ-${String(entries.length + 1).padStart(3, '0')}`,
         evidence: v.sources,
         standard_refs: ['DCB0160 4.3.1 identify hazards in normal and fault conditions', 'DCB0160 4.4.1 estimate severity, likelihood and clinical risk', 'DCB0160 3.3.2 CSO approves each version of the Hazard Log'],
