@@ -17,7 +17,7 @@
 <br/>
 
 [![License](https://img.shields.io/badge/License-MIT-1A1A1A?style=for-the-badge)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-47_passing-2ea043?style=for-the-badge)](./test)
+[![Tests](https://img.shields.io/badge/tests-55_passing-2ea043?style=for-the-badge)](./test)
 [![Local model](https://img.shields.io/badge/runs_on_a_local_model-Gemma_via_Ollama-1A1A1A?style=for-the-badge)](#why-these-two-models)
 [![CI](https://github.com/patkusch/hazlog/actions/workflows/ci.yml/badge.svg)](https://github.com/patkusch/hazlog/actions/workflows/ci.yml)
 
@@ -37,20 +37,21 @@ A hospital is moving 1.4 million allergy records into a new patient record syste
 
 One design fills the allergy screen on day one. The other keeps it empty on purpose, because the old data is not safe to prescribe from. Only one can happen.
 
-HAZLOG found this with a local model (gemma3:12b, 6 min 11 s on an Apple M5 with 16 GB) and wrote it up as a DCB0160 hazard log entry. DCB0160 is the NHS standard that makes a hospital list every way a new clinical system could harm a patient; the hazard log is that list. This is the entry exactly as the model wrote it, from [`docs/runs/gemma3-12b/hazard-log.json`](./docs/runs/gemma3-12b/hazard-log.json):
+HAZLOG found this with a local model (gemma3:12b, 6 min 11 s on an Apple M5 with 16 GB) and wrote it up as a DCB0160 hazard log entry. DCB0160 is the NHS standard that makes a hospital list every way a new clinical system could harm a patient; the hazard log is that list. This is the entry from [`docs/runs/gemma3-12b/hazard-log.json`](./docs/runs/gemma3-12b/hazard-log.json), as the model wrote it except for one figure: the model proposed severity Considerable, and a code rule then raised it to Major, for the reason in the entry's own rationale:
 
 | | HZ-001 |
 |---|---|
 | Hazard | Conflicting Allergy Data Visibility |
 | Clinical effect | Patients may be exposed to inaccurate or unverified allergy information, potentially leading to adverse drug reactions or inappropriate treatment decisions. |
-| Proposed severity · likelihood | Considerable · Medium |
+| Proposed severity · likelihood | **Major** · Medium |
+| Severity rationale | *"Raised from Considerable to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (`FLLD-DM-v3.md:32` explicitly declares its own severity 'Unknown' on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document)."* |
 | Proposed control | Resolve the conflict between requirements by ensuring DM-04-R03 is revised to align with CLIN-11-R01 and CLIN-11-R02, preventing migrated allergy data from populating the clinical summary panel at go-live. |
 | Proposed owner | Migration Architect |
 | Evidence | `FLLD-CLIN-v2.md:16` ✓ · `FLLD-DM-v3.md:26` ✓ |
 
 **Both quotes were checked against the source line before the entry was shown. Nothing is a log entry until a named Clinical Safety Officer signs it.**
 
-The same run missed the sharper problem inside this contradiction, and a Clinical Safety Officer would raise Considerable to Major. Both are written up under [Live runs](#live-runs).
+The model's own severity estimate was Considerable — it treated the panel-visibility contradiction as one input among several, the way DCB0160 4.4.1 asks for an estimate but does not say how to weigh one. It should never have scored this low: one side of the contradiction (`FLLD-DM-v3.md:32`, DM-04-R05) explicitly declares its own severity "Unknown" and keeps that record active and visible on the same panel the other document assumes is empty — an unresolved severity on a live prescribing panel is the hazard, not one fact to average against the other document's claim. `src/risk.ts` now enforces that as a floor: any hazard whose own cited evidence includes a document making that declaration is never scored below Major, whatever the model proposed, and `test/severity-floor.test.ts` pins it. The model's own write-up of *why* (its `causes`) still never mentions DM-04-R05 — narratively, it never connected the two — which is a detection gap this fix does not close. See [Live runs](#live-runs).
 
 ---
 
@@ -127,6 +128,9 @@ corpus/                       local, never leaves the machine
   Pass 3  hazard log entry                Gemma, local, schema-constrained
         |   causes, clinical effect, proposed severity and likelihood,
         |   controls, owner, evidence
+        |   -> severity floor, code (src/risk.ts): explicit "Unknown"
+        |      severity left live on a clinical panel is never scored
+        |      below Major, whatever the model proposed
         v
   out/findings.json  out/hazard-log.json
         |
@@ -163,7 +167,7 @@ Five entries ship in the fixture, from the same corpus:
 
 ## Live runs
 
-Both runs are the shipped code against the same corpus, on the machine this was built on (Apple M5, 16 GB), through Ollama on loopback. The outputs are committed unedited under `docs/runs/` and held to the same tests as the fixture: every quote must resolve to its line.
+Both runs are the shipped code against the same corpus, on the machine this was built on (Apple M5, 16 GB), through Ollama on loopback. The outputs are committed exactly as the pipeline produces them under `docs/runs/` and held to the same tests as the fixture: every quote must resolve to its line. The one thing in them that is not the model's raw proposal is severity, where the floor described below applies; everything else — causes, clinical effect, controls, owner, likelihood, evidence — is unedited model output.
 
 | | gemma3 (4B) | gemma3:12b |
 |---|---|---|
@@ -173,11 +177,13 @@ Both runs are the shipped code against the same corpus, on the machine this was 
 | Findings that passed verification | 2 | 3 |
 | Candidates discarded | 0 | 0 |
 | Planted defects found (of 5) | 1, loosely | 3: the panel contradiction, the unowned safeguarding decision, the ward-code orphan |
-| Proposed severity for the headline hazard | Significant · Medium | Considerable · Medium |
+| Proposed severity for the headline hazard | Major · Medium (model proposed Significant, floor raised it) | Major · Medium (model proposed Considerable, floor raised it) |
 
 The first 4B run, before excerpt-anchored correction, produced zero findings: every candidate quoted a real line and mislabelled its address, and the verifier dropped all of them. That run is what motivated the correction rule, and the rule is deliberately narrow: a quote is only re-addressed when it exists on exactly one line.
 
-What the 12B run got right is the point of the build: it found the contradiction at the top of this page unprompted, and nothing made up survived to the page. What it missed is the honest part: the *severity Unknown* mechanism inside that contradiction, the *No known allergy* fallback, and the cancelled-in-chat severity derivation. A Clinical Safety Officer would also raise its Considerable to Major.
+What the 12B run got right is the point of the build: it found the contradiction at the top of this page unprompted, and nothing made up survived to the page. What it still misses is honest: its own `causes` for that hazard never mention DM-04-R05, the requirement that defaults unparsed severity to "Unknown" and keeps the record active and visible on the same panel — the model never narratively connected the two, only the corpus-line scan does. The *No known allergy* fallback and the cancelled-in-chat severity derivation are two more planted defects this run doesn't find at all; that is a detection gap, separate from severity calibration, and it is still open.
+
+The severity floor fixes one thing: calibration once a hazard is found. It fired on both live runs above — the 12B run's HZ-001 (model proposed Considerable) and the 4B run's HZ-002, "Default Severity Migration" (model proposed Significant, despite its own `causes` naming DM-04-R05 directly). Both are now Major, with the reason recorded in the entry's `severity_rationale`. It is the only calibration rule in the pipeline: every other severity and every likelihood value below is still exactly what the model proposed, unaudited.
 
 ## Run it
 
@@ -196,7 +202,7 @@ For `make run`: install [Ollama](https://ollama.com), then `ollama pull gemma3`.
 ## Limits
 
 - **The corpus is synthetic.** Four artefacts, written for this demo to contain five defects. It is shaped like a real programme's artefacts; it is not one.
-- **Severity and likelihood are proposals.** The rating is computed from the matrix, never asserted by the model, and none of it is a hazard log entry until a named CSO signs. The UI records the signature in the browser only.
+- **Severity and likelihood are proposals.** The rating is computed from the matrix, never asserted by the model, and none of it is a hazard log entry until a named CSO signs. The UI records the signature in the browser only. One severity is not left to the model at all: a hazard whose own cited evidence includes a document that explicitly declares its own severity "Unknown" on a field it keeps active, visible or live on a clinical or prescribing panel is never scored below Major, regardless of what the model proposed (`src/risk.ts`, `checkSeverityFloor` / `applySeverityFloor`, pinned by `test/severity-floor.test.ts`). That is the one calibration rule in the pipeline; every other severity and every likelihood value is still exactly what the model proposed, unaudited.
 - **The fixture is the default view, not the only one.** `out/hazard-log.json` was authored to show all five planted defects. The live runs in `docs/runs/` are what the local model actually produces; the 12B run finds three of the five. Both are held to the same tests: every quote resolves to its line, every relationship finding spans two documents.
 - **Verified means the quote is there, not that it supports the claim.** In the 12B run, HZ-003 (ward-code orphan dependency) reasons correctly from Row 12 of the mapping sheet and two chat lines, then cites line 41 of the migration design, which is the paediatric verification flag and says nothing about ward codes. The line is real, the quote is verbatim, the citation verifies, and it is the wrong evidence. Provenance checking catches fabrication; it does not catch irrelevance. That is a reviewer's job and the UI puts the line in front of them for that reason.
 - **Four artefacts.** Cross-document detection at this corpus size fits in one context window. Beyond that it needs chunking and a second pass over pairs, and that is not built.
