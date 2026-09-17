@@ -18,6 +18,7 @@
         "FLLD-CLIN-11 CLIN-11-R01/R05 assume an empty panel and patient-elicited severity",
         "Regex derivation demonstrably misses anaphylaxis across a line break (dry-run extract)"
       ],
+      "cited_requirements": ["DM-04-R05", "DM-04-R03", "CLIN-11-R01", "CLIN-11-R05", "CHAT-04"],
       "clinical_effect": "A prescriber sees an active allergy with severity Unknown for a patient with a documented anaphylaxis. Emergency orders are exempt from the reconciliation hard-stop, so an emergency drug order can be placed against the Unknown record. The reconciliation appointment that the clinical design relies on is the encounter in progress.",
       "existing_controls": [
         "CLIN-11-R04 ePMA hard-stop on non-emergency orders (does not cover emergency orders)",
@@ -52,6 +53,7 @@
         "field-mapping.csv Row 4 implements the same fallback",
         "FLLD-CLIN-11 CLIN-11-R02 prohibits legacy data populating a clinical field; the fallback is not treated as legacy data"
       ],
+      "cited_requirements": ["DM-04-R02", "MAP-ROW-04", "CLIN-11-R02"],
       "clinical_effect": "Drug-allergy interaction alerts cannot fire on a No known allergy record. A prescriber is positively told the patient has no allergy.",
       "existing_controls": ["Legacy text retained in secondary notes (not surfaced to the prescribing workflow)"],
       "proposed_severity": "Catastrophic",
@@ -80,6 +82,7 @@
         "Joint walkthrough cancelled; formal minuting skipped",
         "No change request raised against FLLD-DM-04"
       ],
+      "cited_requirements": ["DM-04-R04", "MAP-ROW-06", "CHAT-02", "CHAT-11"],
       "clinical_effect": "Which behaviour ships is determined by which document the developer read. Either outcome is uncontrolled: derivation reintroduces HZ-001, suppression without a design change leaves Unknown defaults undefined.",
       "existing_controls": ["None recorded"],
       "proposed_severity": "Considerable",
@@ -102,6 +105,7 @@
       "hazard_name": "Ward location codes migrate through an undefined lookup",
       "hazard_description": "Row 12 migrates WARD_LOCATION_CODE via a Ward Master reference that no approved design defines. The gap is acknowledged in the channel and parked.",
       "causes": ["No design artefact for ward-level location translation", "Mapping row left at Migrate=Y pending a response"],
+      "cited_requirements": ["MAP-ROW-12", "CHAT-09"],
       "clinical_effect": "Inpatient allergy records reject at load or attach to the wrong care setting; misattributed care setting can misdirect ward-level alerts.",
       "existing_controls": ["DM-04-R09 staging exception queue, 72-hour manual resolution"],
       "proposed_severity": "Significant",
@@ -122,6 +126,7 @@
       "hazard_name": "Paediatric safeguarding note truncated by migration; ownership declined",
       "hazard_description": "A safeguarding flag held only in free-text CLINICAL_COMMENTS sits beyond the 4000-character truncation in Row 10. The question of ownership was raised in the channel and redirected out of it. No decision is recorded anywhere.",
       "causes": ["Row 10 truncation at 4000 characters", "Safeguarding information held in uncoded free text in the legacy system", "Ownership declined by the migration workstream and not picked up"],
+      "cited_requirements": ["MAP-ROW-10", "CHAT-13", "CHAT-14"],
       "clinical_effect": "A child's safeguarding flag is silently lost at cutover. The paediatric verification flag (DM-04-R08) covers allergy records only.",
       "existing_controls": ["None"],
       "proposed_severity": "Major",

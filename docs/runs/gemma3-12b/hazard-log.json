@@ -2,8 +2,8 @@
   "run": {
     "engine": "GEMMA_LOCAL",
     "model": "gemma3:12b",
-    "timestamp": "2026-09-03T18:36:57.409Z",
-    "execution_ms": 370992,
+    "timestamp": "2026-09-17T06:40:52.913Z",
+    "execution_ms": 413425,
     "corpus_files": [
       "FLLD-CLIN-v2.md",
       "FLLD-DM-v3.md",
@@ -23,55 +23,122 @@
     {
       "finding_id": "F-01",
       "hazard_name": "Conflicting Allergy Data Visibility",
-      "hazard_description": "Conflicting requirements exist regarding the visibility of legacy allergy data in the Aurora clinical summary panel, potentially leading to inaccurate or unverified allergy information being presented to clinicians.",
+      "hazard_description": "Legacy allergy data visibility requirements conflict between FLLD-CLIN-v2.md and FLLD-DM-v3.md, potentially exposing patients to inaccurate information.",
       "causes": [
-        "CLIN-11-R01 states legacy allergy data should be unpopulated at go-live.",
-        "CLIN-11-R02 states legacy allergy data must never populate a clinical field.",
-        "DM-04-R03 states migrated allergy records *will* be visible in the panel at go-live."
+        "CLIN-11-R01: The Aurora Allergy & Intolerance clinical summary panel shall be unpopulated and empty at go-live for all migrated patients. FILE:FLLD-CLIN-v2.md|16|The Aurora Allergy & Intolerance clinical summary panel shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions.",
+        "CLIN-11-R02: Legacy allergy data must never populate a clinical field. FILE:FLLD-CLIN-v2.md|19|Legacy allergy data must never populate a clinical field, because the Clinical Safety Group ruled it unsafe for prescribing due to inconsistent coding and unverified severity in the legacy PAS.",
+        "DM-04-R03: Migrated allergy records will be visible and active in the panel at go-live. FILE:FLLD-DM-v3.md|26|All migrated allergy records shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live."
+      ],
+      "cited_requirements": [
+        "CLIN-11-R01",
+        "CLIN-11-R02",
+        "DM-04-R03"
       ],
       "clinical_effect": "Patients may be exposed to inaccurate or unverified allergy information, potentially leading to adverse drug reactions or inappropriate treatment decisions.",
       "existing_controls": [
-        "The Clinical Safety Group ruled it unsafe for prescribing due to inconsistent coding and unverified severity in the legacy PAS (FLLD-CLIN-v2.md:19)"
+        "None recorded"
       ],
       "proposed_severity": "Major",
       "proposed_likelihood": "Medium",
       "proposed_controls": [
-        "Resolve the conflict between requirements by ensuring DM-04-R03 is revised to align with CLIN-11-R01 and CLIN-11-R02, preventing migrated allergy data from populating the clinical summary panel at go-live."
+        "Review and reconcile conflicting requirements between FLLD-CLIN-v2.md and FLLD-DM-v3.md.",
+        "Implement a mechanism to ensure data accuracy and verification before displaying legacy allergy information."
       ],
-      "proposed_owner_role": "Migration Architect",
+      "proposed_owner_role": "Clinical Safety Officer",
       "evidence": [
         {
           "file": "FLLD-CLIN-v2.md",
           "line": 16,
-          "excerpt": "shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions.",
+          "excerpt": "The Aurora Allergy & Intolerance clinical summary panel shall be unpopulated and empty at go-live for all migrated patients, to ensure unverified legacy data does not compromise acute prescribing decisions.",
           "verified": true
         },
         {
           "file": "FLLD-DM-v3.md",
           "line": 26,
-          "excerpt": "shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live.",
+          "excerpt": "All migrated allergy records shall be rendered immediately visible and active in the Aurora Allergy & Intolerance clinical summary panel upon initial user login at go-live.",
           "verified": true
         }
       ],
+      "severity_rationale": "Raised from Considerable to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document).",
+      "severity_raised": true,
+      "severity_raised_from": "Considerable",
+      "severity_raised_reason": "Raised from Considerable to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document).",
+      "severity_raised_source": {
+        "file": "FLLD-DM-v3.md",
+        "line": 32
+      },
+      "severity_floor_citation_gap": true,
+      "severity_floor_missing_requirement_id": "DM-04-R05",
       "hazard_id": "HZ-001",
       "standard_refs": [
         "DCB0160 4.3.1 identify hazards in normal and fault conditions",
         "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
         "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
-      ],
-      "severity_rationale": "Raised from Considerable to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document).",
-      "severity_raised": true,
-      "severity_raised_from": "Considerable",
-      "severity_raised_reason": "Raised from Considerable to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document)."
+      ]
     },
     {
       "finding_id": "F-02",
-      "hazard_name": "Paediatric Safeguarding Note Truncation",
-      "hazard_description": "Safeguarding notes for paediatric patients may be truncated due to a 4000-character limit, potentially leading to inadequate protection and increased risk of harm.",
+      "hazard_name": "Defaulted Allergy Severity",
+      "hazard_description": "Defaulting allergy severity to 'Unknown' without clinical oversight contradicts established clinical guidelines.",
       "causes": [
-        "Row 10 of the data mapping truncates clinical comments at 4000 characters.",
-        "The safeguarding flag is held in CLINICAL_COMMENTS, not a coded field.",
-        "Responsibility for resolving this issue has been deflected to the PAS safeguarding lead."
+        "CLIN-11-R05: Allergy severity and adverse reaction manifestations shall be captured directly from the patient at first appointment. FILE:FLLD-CLIN-v2.md|28|Allergy severity and adverse reaction manifestations shall be captured directly from the patient at first appointment, never inferred or derived from automated algorithms or unverified historical free-text notes.",
+        "DM-04-R05: Severity defaults to 'Unknown' if not parsed from legacy notes. FILE:FLLD-DM-v3.md|32|the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible in the clinical summary panel pending review at the patient's next encounter."
+      ],
+      "cited_requirements": [
+        "CLIN-11-R05",
+        "DM-04-R05"
+      ],
+      "clinical_effect": "Patients may be incorrectly classified as having an 'Unknown' allergy severity, potentially leading to inappropriate treatment or delayed recognition of a serious allergic reaction.",
+      "existing_controls": [
+        "None recorded"
+      ],
+      "proposed_severity": "Major",
+      "proposed_likelihood": "Medium",
+      "proposed_controls": [
+        "Review and revise the data migration process to prevent automatic severity defaulting.",
+        "Implement a workflow for clinical review and verification of allergy severity upon patient encounter."
+      ],
+      "proposed_owner_role": "Clinical Lead Pharmacy & Therapeutics",
+      "evidence": [
+        {
+          "file": "FLLD-CLIN-v2.md",
+          "line": 28,
+          "excerpt": "Allergy severity and adverse reaction manifestations shall be captured directly from the patient at first appointment, never inferred or derived from automated algorithms or unverified historical free-text notes.",
+          "verified": true
+        },
+        {
+          "file": "FLLD-DM-v3.md",
+          "line": 32,
+          "excerpt": "the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible in the clinical summary panel pending review at the patient's next encounter.",
+          "verified": true
+        }
+      ],
+      "severity_rationale": "Raised from Significant to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document).",
+      "severity_raised": true,
+      "severity_raised_from": "Significant",
+      "severity_raised_reason": "Raised from Significant to Major: unverified severity on a live prescribing panel is not merely one input, it is the hazard (FLLD-DM-v3.md:32 explicitly declares its own severity \"Unknown\" on a field that stays active/visible on a live clinical panel, and this hazard's own evidence already cites that document).",
+      "severity_raised_source": {
+        "file": "FLLD-DM-v3.md",
+        "line": 32
+      },
+      "hazard_id": "HZ-002",
+      "standard_refs": [
+        "DCB0160 4.3.1 identify hazards in normal and fault conditions",
+        "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
+        "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
+      ]
+    },
+    {
+      "finding_id": "F-03",
+      "hazard_name": "Unowned Safeguarding Note Truncation Risk",
+      "hazard_description": "Safeguarding notes for paediatric patients may be truncated due to character limits, with responsibility deflected to the PAS safeguarding lead.",
+      "causes": [
+        "CHAT-13: Safeguarding notes may be truncated due to Row 10's 4000-character limit. FILE:teams-export.txt|13|The safeguarding flag on the CareTrak record for the Okafor child (NHS 621 903 4471) is held in CLINICAL_COMMENTS, not a coded field. If Row 10 truncates at 4000 characters the safeguarding note is at the end and will be cut. Who owns that?",
+        "CHAT-14: Responsibility deflected to PAS safeguarding lead. FILE:teams-export.txt|14|Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint."
+      ],
+      "cited_requirements": [
+        "CHAT-13",
+        "CHAT-14"
       ],
       "clinical_effect": "Critical safeguarding information for paediatric patients may be lost, potentially leading to inadequate protection and increased risk of harm.",
       "existing_controls": [
@@ -80,8 +147,8 @@
       "proposed_severity": "Major",
       "proposed_likelihood": "Low",
       "proposed_controls": [
-        "Review the data mapping (Row 10) to increase the character limit for CLINICAL_COMMENTS or explore alternative methods for capturing and displaying safeguarding information.",
-        "Escalate the issue to the PAS safeguarding lead to ensure ownership and resolution."
+        "Clarify ownership and responsibility for safeguarding note truncation risk.",
+        "Implement a solution to prevent truncation of safeguarding notes, such as increasing the character limit or using a coded field."
       ],
       "proposed_owner_role": "PAS Safeguarding Lead",
       "evidence": [
@@ -95,46 +162,6 @@
           "file": "teams-export.txt",
           "line": 14,
           "excerpt": "Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint.",
-          "verified": true
-        }
-      ],
-      "hazard_id": "HZ-002",
-      "standard_refs": [
-        "DCB0160 4.3.1 identify hazards in normal and fault conditions",
-        "DCB0160 4.4.1 estimate severity, likelihood and clinical risk",
-        "DCB0160 3.3.2 CSO approves each version of the Hazard Log"
-      ]
-    },
-    {
-      "finding_id": "F-03",
-      "hazard_name": "Ward Code Mapping Dependency",
-      "hazard_description": "Patient location data may be inaccurate or missing due to a dependency on a non-existent design document for ward-level location translation.",
-      "causes": [
-        "DM-04-R12 states AUR_CARE_SETTING_ID will be populated via a direct lookup pending a Ward Master ref.",
-        "CHAT-09 and CHAT-10 highlight the absence of an approved design document for ward-level location translation."
-      ],
-      "clinical_effect": "Patient location data may be inaccurate or missing, potentially hindering care coordination and impacting patient safety.",
-      "existing_controls": [
-        "A mandatory verification flag will be applied to records (FLLD-DM-v3.md:41)"
-      ],
-      "proposed_severity": "Minor",
-      "proposed_likelihood": "Medium",
-      "proposed_controls": [
-        "Develop and approve a design document for ward-level location translation.",
-        "Implement a temporary workaround for populating AUR_CARE_SETTING_ID until the design document is approved."
-      ],
-      "proposed_owner_role": "Migration Architect",
-      "evidence": [
-        {
-          "file": "FLLD-DM-v3.md",
-          "line": 41,
-          "excerpt": "shall carry a mandatory verification flag requiring secondary review at the subsequent hospital encounter.",
-          "verified": true
-        },
-        {
-          "file": "teams-export.txt",
-          "line": 9,
-          "excerpt": "Also noticed Row 12 has a dependency on ward-code mapping from the legacy PAS, but there is no approved design document for ward-level location translation.",
           "verified": true
         }
       ],

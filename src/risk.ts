@@ -65,6 +65,7 @@ export type SeverityFloorEntry = {
   hazard_name: string;
   hazard_description: string;
   causes: string[];
+  cited_requirements?: string[];
   evidence: { file: string; line: number; excerpt?: string }[];
 };
 export type SeverityFloorCheck = { raised: boolean; because?: string; source?: { file: string; line: number } };
@@ -99,23 +100,81 @@ export function checkSeverityFloor(corpus: Corpus, entry: SeverityFloorEntry): S
   return { raised: false };
 }
 
+// Mirrors prepass.ts's heading regex: "### DM-04-R05: Severity Default on Parse Failure".
+// Kept local rather than imported so risk.ts stays a self-contained, synthetic-corpus-testable
+// module, the same way checkSeverityFloor already reads the corpus fresh rather than trusting
+// anything upstream computed about it.
+const HEADING_REQUIREMENT_ID = /^###\s+([A-Z]{2,6}-\d{2}-R\d{2}):/;
+const INLINE_REQUIREMENT_ID = /\b([A-Z]{2,6}-\d{2}-R\d{2})\b/;
+
+/** The requirement id that owns a given corpus line: on the line itself, or in a "### ID:" heading directly above it (how Pass 1 reads requirement text). Undefined if neither is present. */
+export function requirementIdAt(corpus: Corpus, file: string, line: number): string | undefined {
+  const f = corpus.files.find((x) => x.file === file);
+  if (!f) return undefined;
+  const own = f.lines[line - 1];
+  const inline = own?.match(INLINE_REQUIREMENT_ID);
+  if (inline) return inline[1];
+  const above = f.lines[line - 2];
+  const heading = above?.match(HEADING_REQUIREMENT_ID);
+  return heading ? heading[1] : undefined;
+}
+
+export type FloorCitationCheck = { checked: boolean; gap: boolean; requirementId?: string };
+
+/**
+ * When the floor fires, did the model's own `cited_requirements` actually
+ * name the requirement that triggered it? This is the detection gap the
+ * floor itself does not fix: the floor can raise a hazard's severity from
+ * corpus text alone, while the model's own `causes` never mentions why. This
+ * check never touches proposed_severity, causes or evidence - it only
+ * reports whether the model's explanation and the floor's reason are the
+ * same fact, so the entry can say so honestly.
+ *
+ * `checked: false` means we could not identify a requirement id for the
+ * triggering line at all (no heading above it, no id at the tail of a
+ * heading match) - in that case we do not guess, and no gap is reported.
+ */
+export function checkFloorCitation(corpus: Corpus, check: SeverityFloorCheck, citedRequirements: string[] | undefined): FloorCitationCheck {
+  if (!check.raised || !check.source) return { checked: false, gap: false };
+  const requirementId = requirementIdAt(corpus, check.source.file, check.source.line);
+  if (!requirementId) return { checked: false, gap: false };
+  const cited = (citedRequirements ?? []).some((id) => id.trim().toUpperCase() === requirementId.toUpperCase());
+  return { checked: true, gap: !cited, requirementId };
+}
+
 /**
  * Apply the floor. Never lowers a severity the model proposed; never invents
  * a reason when the floor did not fire. When it does fire and raises the
  * severity, the reason is prepended to severity_rationale so it travels with
  * the hazard log entry the CSO reviews, and severity_raised* fields record
  * it structurally for anything that wants to check without parsing prose.
+ *
+ * It also checks, but never patches, whether the model's own
+ * `cited_requirements` names the requirement that triggered the floor. If it
+ * does not, `severity_floor_citation_gap` is set and
+ * `severity_floor_missing_requirement_id` names the id the model should have
+ * cited but didn't. Nothing is injected into `causes` or `cited_requirements`
+ * on the model's behalf: a gap the model actually left is reported, not
+ * silently closed.
  */
 export function applySeverityFloor<T extends SeverityFloorEntry & { proposed_severity: string; severity_rationale?: string }>(
   corpus: Corpus,
   entry: T,
-): T & { severity_raised?: true; severity_raised_from?: string; severity_raised_reason?: string } {
+): T & {
+  severity_raised?: true;
+  severity_raised_from?: string;
+  severity_raised_reason?: string;
+  severity_raised_source?: { file: string; line: number };
+  severity_floor_citation_gap?: true;
+  severity_floor_missing_requirement_id?: string;
+} {
   const check = checkSeverityFloor(corpus, entry);
   if (!check.raised) return entry;
   if (severityScore(entry.proposed_severity) >= severityScore(SEVERITY_FLOOR_LEVEL)) return entry;
 
   const from = entry.proposed_severity;
   const reason = `Raised from ${from} to ${SEVERITY_FLOOR_LEVEL}: unverified severity on a live prescribing panel is not merely one input, it is the hazard (${check.because}).`;
+  const citation = checkFloorCitation(corpus, check, entry.cited_requirements);
   return {
     ...entry,
     proposed_severity: SEVERITY_FLOOR_LEVEL,
@@ -123,5 +182,7 @@ export function applySeverityFloor<T extends SeverityFloorEntry & { proposed_sev
     severity_raised: true,
     severity_raised_from: from,
     severity_raised_reason: reason,
+    severity_raised_source: check.source,
+    ...(citation.checked && citation.gap ? { severity_floor_citation_gap: true, severity_floor_missing_requirement_id: citation.requirementId } : {}),
   };
 }

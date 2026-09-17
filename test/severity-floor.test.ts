@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCorpus, type Corpus } from '../src/corpus.ts';
-import { checkSeverityFloor, applySeverityFloor, severityScore, SEVERITY_FLOOR_LEVEL } from '../src/risk.ts';
+import { checkSeverityFloor, applySeverityFloor, severityScore, SEVERITY_FLOOR_LEVEL, requirementIdAt, checkFloorCitation } from '../src/risk.ts';
 
 /**
  * Pins the one calibration rule that is code, not prompt: a hazard whose
@@ -149,6 +149,123 @@ describe('checkSeverityFloor / applySeverityFloor: explicit Unknown severity on 
   });
 });
 
+/**
+ * The detection gap the README flags: the floor can raise severity from
+ * corpus text alone while the model's own `causes` never explain why. These
+ * tests pin `cited_requirements` and the honest `severity_floor_citation_gap`
+ * flag that reports the gap instead of papering over it - see src/risk.ts,
+ * `checkFloorCitation` / `requirementIdAt`.
+ */
+describe('checkFloorCitation / requirementIdAt: does the model\'s own citation name the requirement that triggered the floor?', () => {
+  const corpus = synthCorpus({
+    'design-a.md': [
+      '### SYS-01-R09: Severity Default on Parse Failure',
+      'Where no severity can be parsed the record is migrated with severity set to "Unknown" and remains active and visible in the clinical prescribing panel.',
+    ],
+    'design-b.md': [
+      'The clinical panel shall be empty at go-live for all migrated patients.',
+    ],
+  });
+
+  test('requirementIdAt reads the heading directly above the triggering line', () => {
+    assert.equal(requirementIdAt(corpus, 'design-a.md', 2), 'SYS-01-R09');
+    assert.equal(requirementIdAt(corpus, 'design-a.md', 1), 'SYS-01-R09', 'the heading line itself also carries its id inline');
+    assert.equal(requirementIdAt(corpus, 'design-b.md', 1), undefined, 'no heading above this line and no id inline');
+  });
+
+  test('checkFloorCitation: gap reported when the model never cites the triggering requirement', () => {
+    const entry = {
+      hazard_name: 'Conflicting panel visibility',
+      hazard_description: 'desc mentions clinical panel',
+      causes: ['some prose that never names SYS-01-R09'],
+      cited_requirements: ['SOME-OTHER-ID'],
+      proposed_severity: 'Considerable',
+      evidence: [
+        { file: 'design-a.md', line: 2, excerpt: 'severity set to "Unknown" and remains active and visible' },
+        { file: 'design-b.md', line: 1, excerpt: 'The clinical panel shall be empty at go-live' },
+      ],
+    };
+    const check = checkSeverityFloor(corpus, entry);
+    assert.equal(check.raised, true);
+    const citation = checkFloorCitation(corpus, check, entry.cited_requirements);
+    assert.equal(citation.checked, true);
+    assert.equal(citation.gap, true);
+    assert.equal(citation.requirementId, 'SYS-01-R09');
+  });
+
+  test('checkFloorCitation: no gap when the model does cite the triggering requirement (case-insensitive)', () => {
+    const entry = {
+      hazard_name: 'Conflicting panel visibility',
+      hazard_description: 'desc mentions clinical panel',
+      causes: ['SYS-01-R09 defaults unparsed severity to Unknown'],
+      cited_requirements: ['sys-01-r09'],
+      proposed_severity: 'Considerable',
+      evidence: [
+        { file: 'design-a.md', line: 2, excerpt: 'severity set to "Unknown" and remains active and visible' },
+        { file: 'design-b.md', line: 1, excerpt: 'The clinical panel shall be empty at go-live' },
+      ],
+    };
+    const check = checkSeverityFloor(corpus, entry);
+    const citation = checkFloorCitation(corpus, check, entry.cited_requirements);
+    assert.equal(citation.checked, true);
+    assert.equal(citation.gap, false);
+  });
+
+  test('applySeverityFloor: model cites the triggering requirement -> raised, no citation gap flagged', () => {
+    const entry = {
+      hazard_name: 'Conflicting panel visibility',
+      hazard_description: 'desc mentions clinical panel',
+      causes: ['SYS-01-R09 defaults unparsed severity to Unknown and keeps it active'],
+      cited_requirements: ['SYS-01-R09'],
+      proposed_severity: 'Considerable',
+      evidence: [
+        { file: 'design-a.md', line: 2, excerpt: 'severity set to "Unknown" and remains active and visible' },
+        { file: 'design-b.md', line: 1, excerpt: 'The clinical panel shall be empty at go-live' },
+      ],
+    };
+    const out = applySeverityFloor(corpus, entry);
+    assert.equal(out.proposed_severity, 'Major');
+    assert.equal(out.severity_raised, true);
+    assert.equal('severity_floor_citation_gap' in out, false, 'the model already named the requirement, so there is nothing to flag');
+    assert.deepEqual(out.severity_raised_source, { file: 'design-a.md', line: 2 });
+  });
+
+  test('applySeverityFloor: model never cites the triggering requirement -> raised AND flagged, causes/cited_requirements left untouched', () => {
+    const entry = {
+      hazard_name: 'Conflicting panel visibility',
+      hazard_description: 'desc mentions clinical panel',
+      causes: ['One design keeps the panel populated, the other keeps it empty.'],
+      cited_requirements: [] as string[],
+      proposed_severity: 'Considerable',
+      evidence: [
+        { file: 'design-a.md', line: 2, excerpt: 'severity set to "Unknown" and remains active and visible' },
+        { file: 'design-b.md', line: 1, excerpt: 'The clinical panel shall be empty at go-live' },
+      ],
+    };
+    const out = applySeverityFloor(corpus, entry);
+    assert.equal(out.proposed_severity, 'Major', 'the floor still raises the severity even though the model never connected it');
+    assert.equal(out.severity_floor_citation_gap, true);
+    assert.equal(out.severity_floor_missing_requirement_id, 'SYS-01-R09');
+    assert.deepEqual(out.causes, ['One design keeps the panel populated, the other keeps it empty.'], 'nothing is injected into causes on the model\'s behalf');
+    assert.deepEqual(out.cited_requirements, [], 'nothing is injected into cited_requirements on the model\'s behalf');
+  });
+
+  test('checkFloorCitation: checked is false when the floor did not fire, or no requirement id can be resolved for the triggering line', () => {
+    assert.deepEqual(checkFloorCitation(corpus, { raised: false }, ['anything']), { checked: false, gap: false });
+    const noHeadingCorpus = synthCorpus({
+      'design-c.md': ['severity set to "Unknown" and remains active and visible in the clinical panel, no heading above this line'],
+    });
+    const check = checkSeverityFloor(noHeadingCorpus, {
+      hazard_name: 'x', hazard_description: 'clinical panel', causes: [],
+      evidence: [{ file: 'design-c.md', line: 1, excerpt: 'severity set to "Unknown"' }],
+    });
+    assert.equal(check.raised, true);
+    const citation = checkFloorCitation(noHeadingCorpus, check, []);
+    assert.equal(citation.checked, false, 'no id could be resolved for the triggering line, so no gap is reported either way');
+    assert.equal(citation.gap, false);
+  });
+});
+
 describe('the same rule against the real corpus: HZ-001 (DM-04-R05, the panel-visibility contradiction)', () => {
   const corpus = loadCorpus('corpus');
 
@@ -168,6 +285,50 @@ describe('the same rule against the real corpus: HZ-001 (DM-04-R05, the panel-vi
     assert.deepEqual(check.source, { file: 'FLLD-DM-v3.md', line: 32 });
     assert.equal(applySeverityFloor(corpus, entry).proposed_severity, 'Major');
     assert.ok(severityScore(SEVERITY_FLOOR_LEVEL) >= severityScore('Considerable'));
+  });
+
+  test('the exact gap the README describes: the 12B run\'s own causes for HZ-001 never mention DM-04-R05 - the floor still raises severity, and the entry is now honestly flagged rather than silent', () => {
+    // These are the archived gemma3:12b run's actual causes and cited_requirements for HZ-001
+    // (docs/runs/gemma3-12b/hazard-log.json, before this fix added the field): the model explains
+    // the panel-visibility contradiction via CLIN-11-R01/R02/DM-04-R03, and never once names
+    // DM-04-R05, the "severity Unknown" requirement the floor actually fires on.
+    const entry = {
+      hazard_name: 'Conflicting Allergy Data Visibility',
+      hazard_description: 'Conflicting requirements exist regarding the visibility of legacy allergy data in the Aurora clinical summary panel.',
+      causes: [
+        'CLIN-11-R01 states legacy allergy data should be unpopulated at go-live.',
+        'CLIN-11-R02 states legacy allergy data must never populate a clinical field.',
+        'DM-04-R03 states migrated allergy records *will* be visible in the panel at go-live.',
+      ],
+      cited_requirements: ['CLIN-11-R01', 'CLIN-11-R02', 'DM-04-R03'],
+      proposed_severity: 'Considerable',
+      evidence: [
+        { file: 'FLLD-CLIN-v2.md', line: 16, excerpt: 'shall be unpopulated and empty at go-live for all migrated patients' },
+        { file: 'FLLD-DM-v3.md', line: 26, excerpt: 'shall be rendered immediately visible and active in the Aurora Allergy' },
+      ],
+    };
+    const out = applySeverityFloor(corpus, entry);
+    assert.equal(out.proposed_severity, 'Major', 'the floor fires from corpus text alone, whether or not the model connected it');
+    assert.equal(out.severity_floor_citation_gap, true, 'the model cited three requirements but never the one the floor actually depends on');
+    assert.equal(out.severity_floor_missing_requirement_id, 'DM-04-R05');
+    assert.deepEqual(out.cited_requirements, ['CLIN-11-R01', 'CLIN-11-R02', 'DM-04-R03'], 'nothing is injected on the model\'s behalf');
+  });
+
+  test('when the model does cite DM-04-R05 for the same hazard, no citation gap is reported', () => {
+    const entry = {
+      hazard_name: 'Conflicting Allergy Data Visibility',
+      hazard_description: 'Conflicting requirements exist regarding the visibility of legacy allergy data in the Aurora clinical summary panel.',
+      causes: ['DM-04-R05 defaults unparsed severity to Unknown and keeps the record active and visible on the panel.'],
+      cited_requirements: ['DM-04-R05'],
+      proposed_severity: 'Considerable',
+      evidence: [
+        { file: 'FLLD-CLIN-v2.md', line: 16, excerpt: 'shall be unpopulated and empty at go-live for all migrated patients' },
+        { file: 'FLLD-DM-v3.md', line: 26, excerpt: 'shall be rendered immediately visible and active in the Aurora Allergy' },
+      ],
+    };
+    const out = applySeverityFloor(corpus, entry);
+    assert.equal(out.proposed_severity, 'Major');
+    assert.equal('severity_floor_citation_gap' in out, false);
   });
 
   test('HZ-003-style hazard (severity DERIVATION disputed in chat, no explicit Unknown-on-panel evidence): not raised', () => {

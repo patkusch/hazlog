@@ -2,8 +2,8 @@
   "run": {
     "engine": "GEMMA_LOCAL",
     "model": "gemma3:12b",
-    "timestamp": "2026-09-03T18:36:57.409Z",
-    "execution_ms": 370992,
+    "timestamp": "2026-09-17T06:40:52.913Z",
+    "execution_ms": 413425,
     "corpus_files": [
       "FLLD-CLIN-v2.md",
       "FLLD-DM-v3.md",
@@ -547,7 +547,7 @@
       "id": "F-01",
       "type": "CONTRADICTION",
       "title": "Conflicting requirements on legacy data population",
-      "why_incompatible": "CLIN-11-R01 and CLIN-11-R02 both state that legacy allergy data should not populate the clinical summary panel, but DM-04-R03 states that migrated allergy records *will* be visible in the panel at go-live. This creates a conflict regarding the state of migrated data.",
+      "why_incompatible": "CLIN-11-R01 and CLIN-11-R02 both state that legacy allergy data should not populate the clinical summary panel, but DM-04-R03 states that migrated allergy records *will* be visible and active in the panel at go-live. This creates a conflict regarding the visibility of legacy data.",
       "clinical_consequence": "Patients may be exposed to inaccurate or unverified allergy information, potentially leading to adverse drug reactions or inappropriate treatment decisions.",
       "sources": [
         {
@@ -572,9 +572,30 @@
     },
     {
       "id": "F-02",
+      "type": "SILENT_DEFAULT",
+      "title": "Defaulting severity without clinical oversight",
+      "why_incompatible": "DM-04-R05 states that if severity cannot be parsed from legacy notes, the record will default to 'Unknown'. This introduces a clinical fact (allergy severity) without direct patient input or clinician verification, contradicting CLIN-11-R05.",
+      "clinical_consequence": "Patients may be incorrectly classified as having an 'Unknown' allergy severity, potentially leading to inappropriate treatment or delayed recognition of a serious allergic reaction.",
+      "sources": [
+        {
+          "file": "FLLD-CLIN-v2.md",
+          "line": 28,
+          "excerpt": "shall be captured directly from the patient at first appointment, never inferred or derived from automated algorithms or unverified historical free-text notes.",
+          "verified": true
+        },
+        {
+          "file": "FLLD-DM-v3.md",
+          "line": 32,
+          "excerpt": "the record shall be migrated with severity defaulted to \"Unknown\" and shall remain active and visible in the clinical summary panel pending review at the patient's next encounter.",
+          "verified": true
+        }
+      ]
+    },
+    {
+      "id": "F-03",
       "type": "UNOWNED_DECISION",
-      "title": "Paediatric safeguarding note truncation",
-      "why_incompatible": "CHAT-13 raises a concern that safeguarding notes for paediatric patients may be truncated due to Row 10's 4000-character limit. CHAT-14 deflects this question to the PAS safeguarding lead, leaving the resolution of this potential data loss unowned.",
+      "title": "Safeguarding note truncation risk",
+      "why_incompatible": "CHAT-13 raises a concern that safeguarding notes for paediatric patients may be truncated due to Row 10's 4000-character limit. CHAT-14 deflects responsibility to the PAS safeguarding lead, leaving the risk unowned.",
       "clinical_consequence": "Critical safeguarding information for paediatric patients may be lost, potentially leading to inadequate protection and increased risk of harm.",
       "sources": [
         {
@@ -587,27 +608,6 @@
           "file": "teams-export.txt",
           "line": 14,
           "excerpt": "Not us, that's a PAS safeguarding question. Raise it with the safeguarding lead directly rather than here please, this channel is exported to the programme SharePoint.",
-          "verified": true
-        }
-      ]
-    },
-    {
-      "id": "F-03",
-      "type": "ORPHAN_DEPENDENCY",
-      "title": "Ward code mapping dependency",
-      "why_incompatible": "DM-04-R12 states that AUR_CARE_SETTING_ID will be populated via a direct lookup pending a Ward Master ref. CHAT-09 and CHAT-10 highlight that there is no approved design document for ward-level location translation, creating a dependency on a non-existent design.",
-      "clinical_consequence": "Patient location data may be inaccurate or missing, potentially hindering care coordination and impacting patient safety.",
-      "sources": [
-        {
-          "file": "FLLD-DM-v3.md",
-          "line": 41,
-          "excerpt": "shall carry a mandatory verification flag requiring secondary review at the subsequent hospital encounter.",
-          "verified": true
-        },
-        {
-          "file": "teams-export.txt",
-          "line": 9,
-          "excerpt": "Also noticed Row 12 has a dependency on ward-code mapping from the legacy PAS, but there is no approved design document for ward-level location translation.",
           "verified": true
         }
       ]

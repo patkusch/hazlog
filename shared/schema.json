@@ -65,12 +65,13 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": ["finding_id", "hazard_name", "hazard_description", "causes", "clinical_effect", "existing_controls", "proposed_severity", "proposed_likelihood", "proposed_controls", "proposed_owner_role", "evidence"],
+          "required": ["finding_id", "hazard_name", "hazard_description", "causes", "cited_requirements", "clinical_effect", "existing_controls", "proposed_severity", "proposed_likelihood", "proposed_controls", "proposed_owner_role", "evidence"],
           "properties": {
             "finding_id": { "type": "string" },
             "hazard_name": { "type": "string" },
             "hazard_description": { "type": "string" },
             "causes": { "type": "array", "items": { "type": "string" } },
+            "cited_requirements": { "type": "array", "items": { "type": "string" } },
             "clinical_effect": { "type": "string" },
             "existing_controls": { "type": "array", "items": { "type": "string" } },
             "proposed_severity": { "type": "string", "enum": ["Minor", "Significant", "Considerable", "Major", "Catastrophic"] },

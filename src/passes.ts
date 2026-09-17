@@ -18,10 +18,12 @@ export type Requirement = { id: string; statement: string; file: string; line: n
 export type Finding = { id: string; type: string; title: string; why_incompatible: string; clinical_consequence: string; sources: Source[] };
 export type HazardEntry = {
   hazard_id: string; finding_id: string; hazard_name: string; hazard_description: string; causes: string[];
+  cited_requirements: string[];
   clinical_effect: string; existing_controls: string[]; proposed_severity: string; severity_rationale?: string;
   proposed_likelihood: string; likelihood_rationale?: string; proposed_controls: string[]; proposed_owner_role: string;
   evidence: Source[]; standard_refs: string[];
-  severity_raised?: true; severity_raised_from?: string; severity_raised_reason?: string;
+  severity_raised?: true; severity_raised_from?: string; severity_raised_reason?: string; severity_raised_source?: { file: string; line: number };
+  severity_floor_citation_gap?: true; severity_floor_missing_requirement_id?: string;
 };
 export type Dropped = { pass: 1 | 2 | 3; id: string; reason: string; item: unknown };
 
@@ -64,6 +66,7 @@ ${prefixedCorpus(corpus)}`;
 export function pass3Prompt(corpus: Corpus, findings: Finding[]): string {
   return `PASS 3 - HAZARD LOG ENTRY.
 For each finding, draft a DCB0160 hazard log entry. Give hazard_name, hazard_description, causes, clinical_effect, existing_controls (from the corpus; say "None recorded" if none), proposed_severity (Minor, Significant, Considerable, Major, Catastrophic), a one-sentence severity_rationale, proposed_likelihood (Very low, Low, Medium, High, Very high), a one-sentence likelihood_rationale, proposed_controls, proposed_owner_role (a role named in the corpus, or UNASSIGNED with a proposal), and evidence: at least two citations from two different files, each with file, line and an excerpt copied verbatim from that one line (reuse the finding's sources where they fit).
+Also give cited_requirements: the exact requirement id(s) (e.g. "DM-04-R05", "CLIN-11-R01") that your causes explanation is actually based on - not every id mentioned anywhere, only the ones a reader would need to check to see whether your causes are right. Each cause in causes should be traceable to a specific requirement, row or message id from the corpus; do not write causes in prose alone and leave the reader to guess which line backs it. If a cause comes from the chat export or mapping sheet rather than a formal requirement heading, cite the id the corpus itself gives that row or message (e.g. "CHAT-03", "MAP-ROW-12") if there is one, or omit it from cited_requirements rather than inventing one.
 You are proposing. A Clinical Safety Officer confirms severity and likelihood; you do not.
 
 FINDINGS:
