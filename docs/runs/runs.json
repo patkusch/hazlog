@@ -10,13 +10,13 @@
       "id": "gemma3-12b",
       "label": "Live: gemma3:12b, local",
       "path": "/docs/runs/gemma3-12b",
-      "note": "Real run, 6 min 11 s on an Apple M5 with 16 GB. 15 of 15 design requirements extracted with exact provenance (5 addresses corrected from their excerpt); 3 findings, 0 dropped: the cross-document contradiction, the unowned safeguarding decision, the ward-code orphan dependency. HZ-003 cites a real line that does not support its claim; see README, Limits."
+      "note": "Real run, 6 min 53 s on an Apple M5 with 16 GB. 15 of 15 design requirements extracted with exact provenance (5 addresses corrected from their excerpt); 3 findings, 0 dropped: the panel-visibility contradiction, the silent severity default, the unowned safeguarding decision. See README, Live runs and Limits."
     },
     {
       "id": "gemma3-4b",
       "label": "Live: gemma3 (4B), local",
       "path": "/docs/runs/gemma3-4b",
-      "note": "Real run, 90 s. Provenance exact after excerpt correction; the reasoning is thin and one finding pairs unrelated lines."
+      "note": "Real run, 99 s. 9 of 15 design requirements extracted with exact provenance (3 addresses corrected from their excerpt); 2 findings, 0 dropped: the severity-derivation conflict and the unknown severity default. See README, Live runs."
     }
   ]
 }
