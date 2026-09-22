@@ -24,7 +24,6 @@ export type HazardEntry = {
   evidence: Source[]; standard_refs: string[];
   severity_raised?: true; severity_raised_from?: string; severity_raised_reason?: string; severity_raised_source?: { file: string; line: number };
   severity_floor_citation_gap?: true; severity_floor_missing_requirement_id?: string;
-  severity_floor_citation_retry_confirmed?: true; severity_floor_citation_retry_requirement_id?: string;
 };
 export type Dropped = { pass: 1 | 2 | 3; id: string; reason: string; item: unknown };
 
@@ -75,68 +74,6 @@ ${JSON.stringify(findings, null, 1)}
 
 CORPUS:
 ${prefixedCorpus(corpus)}`;
-}
-
-const RETRY_SYSTEM = `You are HAZLOG, continuing a DCB0160 hazard log review. You already drafted a hazard log entry. You are now asked ONE narrow follow-up question about it. Answer only the question asked; do not redraft the entry.`;
-
-/**
- * The one targeted retry `checkFloorCitation` (src/risk.ts) can trigger: when
- * the severity floor fires but the model's own `cited_requirements` never
- * named the requirement that triggered it, this shows the model exactly that
- * evidence line - not the whole corpus, not a Pass 3 re-run - and asks
- * whether it is actually a cause of the hazard it already drafted.
- */
-export function citationRetryPrompt(entry: { hazard_name: string; hazard_description: string; causes: string[] }, evidence: { file: string; line: number; excerpt: string }, requirementId: string): string {
-  return `You previously drafted this hazard log entry:
-Hazard: ${entry.hazard_name}
-Description: ${entry.hazard_description}
-Causes you gave: ${entry.causes.length ? entry.causes.join(' | ') : '(none given)'}
-
-Here is one line from the corpus, requirement ${requirementId}, that determined this hazard's severity:
-${evidence.file}:${evidence.line}| ${evidence.excerpt}
-
-Does this line describe a cause of this hazard? Answer true only if ${requirementId} is genuinely why this hazard exists. Answer false if it is not.`;
-}
-
-type Generate = typeof generateJson;
-
-/**
- * Runs the retry only when `checkFloorCitation` already found a gap (see
- * `severity_floor_citation_gap` on the entry) - so there is nothing to call
- * on the ordinary path where the model cited correctly or the floor never
- * fired. One extra model call, narrowly scoped to the single evidence line
- * that triggered the floor.
- *
- * If the model confirms, the requirement id it confirmed (already known from
- * `requirementIdAt`, not invented by the model) is added to
- * `cited_requirements` and the entry is marked
- * `severity_floor_citation_retry_confirmed` so the log stays honest about
- * where that citation came from. If the model does not confirm, or the call
- * itself fails, the entry is returned unchanged - the original honest
- * `severity_floor_citation_gap` flag stands.
- */
-export async function retryFloorCitation(entry: HazardEntry, corpus: Corpus, opts: OllamaOptions, generate: Generate = generateJson): Promise<HazardEntry> {
-  if (!entry.severity_floor_citation_gap || !entry.severity_floor_missing_requirement_id || !entry.severity_raised_source) return entry;
-  const requirementId = entry.severity_floor_missing_requirement_id;
-  const { file, line } = entry.severity_raised_source;
-  const excerpt = getLine(corpus, file, line);
-  if (excerpt === undefined) return entry;
-
-  let result: { cites: boolean };
-  try {
-    result = await generate<{ cites: boolean }>(RETRY_SYSTEM, citationRetryPrompt(entry, { file, line, excerpt }, requirementId), SCHEMAS.citation_retry, opts);
-  } catch {
-    return entry;
-  }
-  if (!result?.cites) return entry;
-
-  const { severity_floor_citation_gap, severity_floor_missing_requirement_id, ...rest } = entry;
-  return {
-    ...rest,
-    cited_requirements: [...entry.cited_requirements, requirementId],
-    severity_floor_citation_retry_confirmed: true,
-    severity_floor_citation_retry_requirement_id: requirementId,
-  };
 }
 
 /** A contradiction, a silent default, a verbal override or an orphan dependency is a relationship between documents and must cite two. An unowned decision is a gap: it can live entirely in one channel, so it needs two lines, not two files. */
@@ -204,8 +141,6 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
 
   log('pass 3: hazard log entries');
   const entries: HazardEntry[] = [];
-  let citationGaps = 0;
-  let citationGapsClosedByRetry = 0;
   if (findings.length) {
     const p3 = await generateJson<{ entries: Omit<HazardEntry, 'hazard_id' | 'standard_refs'>[] }>(SYSTEM, pass3Prompt(corpus, findings), SCHEMAS.pass3_hazard_entries, opts);
     for (const e of p3.entries ?? []) {
@@ -214,15 +149,7 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
       if (!v.ok) { dropped.push({ pass: 3, id: e.finding_id, reason: v.reason!, item: { ...e, evidence: v.sources } }); continue; }
       try { riskRating(e.proposed_severity, e.proposed_likelihood); } catch (err) { dropped.push({ pass: 3, id: e.finding_id, reason: (err as Error).message, item: e }); continue; }
       // The model proposes; this floor only ever raises it, and only for an explicit "severity: Unknown" left active on a live clinical panel (src/risk.ts).
-      let calibrated = applySeverityFloor(corpus, { ...e, evidence: v.sources });
-      // If the floor's own citation check found a gap, one narrow retry - not a full Pass 3 re-run - asks the
-      // model about just the triggering line before the gap is recorded as final. See retryFloorCitation above.
-      if (calibrated.severity_floor_citation_gap) {
-        citationGaps++;
-        const retried = await retryFloorCitation(calibrated, corpus, opts);
-        if (retried.severity_floor_citation_retry_confirmed) citationGapsClosedByRetry++;
-        calibrated = retried;
-      }
+      const calibrated = applySeverityFloor(corpus, { ...e, evidence: v.sources });
       entries.push({
         ...calibrated,
         hazard_id: `HZ-${String(entries.length + 1).padStart(3, '0')}`,
@@ -231,7 +158,6 @@ export async function runPipeline(corpusDir: string, opts: OllamaOptions & { log
       });
     }
     log(`  ${entries.length} hazard entries verified, ${(p3.entries ?? []).length - entries.length} dropped`);
-    if (citationGaps) log(`  ${citationGapsClosedByRetry} of ${citationGaps} severity-floor citation gap(s) closed by the targeted retry`);
   }
 
   const run = { engine: 'GEMMA_LOCAL', model: opts.model ?? process.env.HAZLOG_MODEL ?? 'gemma3', timestamp: new Date().toISOString(), execution_ms: Date.now() - t0, corpus_files: corpus.files.map((f) => f.file) };

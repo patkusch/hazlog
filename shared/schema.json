@@ -97,12 +97,5 @@
         }
       }
     }
-  },
-  "citation_retry": {
-    "type": "object",
-    "required": ["cites"],
-    "properties": {
-      "cites": { "type": "boolean" }
-    }
   }
 }
