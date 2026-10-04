@@ -6,11 +6,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # package.json says >=24; 26 is the newest line (LTS from 2026-10-28).
+        node: [24, 26]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: ${{ matrix.node }}
       - name: tests (verifier, fixtures, boundary, pre-pass, pipeline against a fake Ollama)
         run: make test
       - name: pre-pass is deterministic and matches the committed index
