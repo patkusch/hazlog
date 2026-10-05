@@ -1,6 +1,10 @@
 {
   "name": "hazlog",
   "version": "0.1.0",
+  "author": "patkusch",
+  "repository": { "type": "git", "url": "git+https://github.com/patkusch/hazlog.git" },
+  "homepage": "https://github.com/patkusch/hazlog#readme",
+  "bugs": { "url": "https://github.com/patkusch/hazlog/issues" },
   "private": true,
   "type": "module",
   "description": "Cross-document clinical hazard detection for DCB0160. Local Gemma reads the corpus; Gemini sees only isolated terms.",
