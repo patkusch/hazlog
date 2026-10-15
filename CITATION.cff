@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "hazlog"
+abstract: "Cross-document clinical hazard detection for DCB0160. Local Gemma reads the corpus; Gemini sees only isolated terms."
+type: software
+authors:
+  - family-names: "Kusch"
+    given-names: "Patricia"
+repository-code: "https://github.com/patkusch/hazlog"
+license: MIT
