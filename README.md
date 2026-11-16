@@ -17,7 +17,7 @@
 <br/>
 
 [![License](https://img.shields.io/badge/License-MIT-1A1A1A?style=for-the-badge)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-65_passing-2ea043?style=for-the-badge)](./test)
+[![Tests](https://img.shields.io/badge/tests-81_passing-2ea043?style=for-the-badge)](./test)
 [![Local model](https://img.shields.io/badge/runs_on_a_local_model-Gemma_via_Ollama-1A1A1A?style=for-the-badge)](#why-these-two-models)
 [![CI](https://github.com/patkusch/hazlog/actions/workflows/ci.yml/badge.svg)](https://github.com/patkusch/hazlog/actions/workflows/ci.yml)
 
