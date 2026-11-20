@@ -237,3 +237,7 @@ test/             verifier · fixtures · boundary · prepass
 ## License
 
 MIT.
+
+---
+
+[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md)
